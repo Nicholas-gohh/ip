@@ -38,6 +38,7 @@ public class Alice {
                 System.out.println(separator);
 
             } else if (userInput.startsWith("mark ")) { //used Codex to find out how to if statements for mark and unmark
+                //remove first 5 chars
                 int taskNo = Integer.parseInt(userInput.substring(5)); //5th char in string
                 Task task = tasks[taskNo - 1]; //5th task means 4 in array
                 task.markAsDone();
@@ -46,6 +47,7 @@ public class Alice {
                 System.out.println(separator);
 
             } else if (userInput.startsWith("unmark ")) {
+                //remove first 7 chars
                 int taskNo = Integer.parseInt(userInput.substring(7)); //7th char in string
                 Task task = tasks[taskNo - 1]; //5th task means 4 in array
                 task.unmarkAsDone();
@@ -53,14 +55,42 @@ public class Alice {
                 System.out.println("  " + task);
                 System.out.println(separator);
 
-            } else { //add the string to list and print it
-                //store the string
-                tasks[inputCount] = new Task(userInput);
+            } else if (userInput.startsWith("todo ")) {
+                //remove first 5 chars
+                String description = userInput.substring(5);
+                tasks[inputCount] = new ToDo(description);
                 inputCount++;
 
-                System.out.println("added: " + userInput);
+                taskAdded(tasks[inputCount - 1], inputCount, separator);
+            } else if (userInput.startsWith("deadline ")) { //found how to split using Codex
+                //remove first 9 chars, then split the remaining string with "/by" into 2
+                String[] sections = userInput.substring(9).split(" /by ", 2);
+                tasks[inputCount] = new Deadline(sections[0], sections[1]);
+                inputCount++;
+
+                taskAdded(tasks[inputCount - 1], inputCount, separator);
+            } else if (userInput.startsWith("event ")) { //found how to split using Codex
+                //remove first 6 chars, then split the remaining string with "/from" into 2
+                String[] fromSection = userInput.substring(6).split(" /from ", 2);
+                //then split again
+                String[] toSection = fromSection[1].split(" /to ", 2);
+                tasks[inputCount] = new Event(fromSection[0], toSection[0], toSection[1]);
+                inputCount++;
+
+                taskAdded(tasks[inputCount - 1], inputCount, separator);
+            } else { //error
+                System.out.println("error");
                 System.out.println(separator);
             }
         }
+    }
+
+    //Helper class for printing task added
+    public static void taskAdded(Task task, int taskNo, String separator) {
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        System.out.println("Now you have " + taskNo + " tasks in the list.");
+        System.out.println(separator);
+
     }
 }
