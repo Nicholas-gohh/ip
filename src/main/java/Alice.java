@@ -19,6 +19,8 @@ public class Alice {
 
         //Used Codex to find how to take in inputs from user
         Scanner scanner = new Scanner(System.in); //object to read
+        String[] userInputs = new String[100];
+        int inputCount = 0;
         while (true) {
             String userInput = scanner.nextLine(); //take in input
             System.out.println(separator);
@@ -27,9 +29,17 @@ public class Alice {
                 System.out.println("Bye. Hope to see you again soon!");
                 System.out.println(separator);
                 break;
-            }
-            else {
-                System.out.println(userInput);
+            } else if (userInput.equals("list")) { //print the list
+                for (int i = 0; i < inputCount; i++) {
+                    System.out.println((i + 1) + ". " + userInputs[i]);
+                }
+                System.out.println(separator);
+            } else { //add the string to list and print it
+                //store the string
+                userInputs[inputCount] = userInput;
+                inputCount++;
+
+                System.out.println("added: " + userInput);
                 System.out.println(separator);
             }
         }
