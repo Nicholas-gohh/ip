@@ -1,3 +1,7 @@
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner; //in order to get inputs from user
 import java.util.ArrayList;
 
@@ -5,6 +9,14 @@ import java.util.ArrayList;
  * Runs the Alice bot.
  */
 public class Alice {
+    // Used Codex to find out how to set Format and parse the input accordingly
+    private static final DateTimeFormatter DEADLINE_INPUT_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_DISPLAY_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy");
+    private static final DateTimeFormatter EVENT_INPUT_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
     /**
      * Starts Alice and processes commands until the user enters {@code bye}.
      *
@@ -51,6 +63,9 @@ public class Alice {
                     int taskNo = getTaskNumber(userInput, "mark", tasks.size());
                     Task task = tasks.get(taskNo - 1); // 5th task means 4 in array
 
+                    if (task.isDone()) {
+                        throw new AliceException("This task is already marked as done.");
+                    }
                     task.markAsDone();
                     storage.save(tasks);
                     System.out.println("Nice! I've marked this task as done:");
@@ -61,6 +76,9 @@ public class Alice {
                     int taskNo = getTaskNumber(userInput, "unmark", tasks.size());
                     Task task = tasks.get(taskNo - 1); // 5th task means 4 in array
 
+                    if (!task.isDone()) {
+                        throw new AliceException("This task is already marked as not done.");
+                    }
                     task.unmarkAsDone();
                     storage.save(tasks);
                     System.out.println("OK, I've marked this task as not done yet:");
@@ -81,9 +99,15 @@ public class Alice {
                     // Remove first 8 chars, then split the remaining string with "/by" into 2
                     String[] sections = userInput.substring(8).trim().split(" /by ", 2);
                     if (sections.length !=2 || sections[0].isBlank() || sections[1].isBlank()) {
-                        throw new AliceException("A deadline needs a description and a /by value.");
+                        throw new AliceException("A deadline needs a description and a /by date.");
                     }
-                    tasks.add(new Deadline(sections[0], sections[1]));
+                    LocalDate by;
+                    try {
+                        by = LocalDate.parse(sections[1], DEADLINE_INPUT_FORMAT);
+                    } catch (DateTimeParseException exception) {
+                        throw new AliceException("Please use the date format yyyy-MM-dd.");
+                    }
+                    tasks.add(new Deadline(sections[0], by));
                     storage.save(tasks);
                     taskAdded(tasks.getLast(), tasks.size(), separator);
 
@@ -91,17 +115,38 @@ public class Alice {
                     // Remove first 5 chars, then split the remaining string with "/from" into 2
                     String[] fromSections = userInput.substring(5).trim().split(" /from ", 2);
                     if (fromSections.length != 2 || fromSections[0].isBlank()) {
-                        throw new AliceException("An event needs a description, a /from value, and a /to value.");
+                        throw new AliceException("An event needs a description, a /from date time, and a /to date time.");
                     }
                     // Split again using "/to"
                     String[] toSections = fromSections[1].split(" /to ", 2);
                     if (toSections.length != 2 || toSections[0].isBlank() || toSections[1].isBlank()) {
-                        throw new AliceException("An event needs a description, a /from value, and a /to value.");
+                        throw new AliceException("An event needs a description, a /from date time, and a /to date time.");
                     }
 
-                    tasks.add(new Event(fromSections[0], toSections[0], toSections[1]));
+                    LocalDateTime from;
+                    LocalDateTime to;
+                    try {
+                        from = LocalDateTime.parse(toSections[0], EVENT_INPUT_FORMAT);
+                        to = LocalDateTime.parse(toSections[1], EVENT_INPUT_FORMAT);
+                    } catch (DateTimeParseException exception) {
+                        throw new AliceException("Please use the event date time format yyyy-MM-dd HHmm.");
+                    }
+                    if (to.isBefore(from)) {
+                        throw new AliceException("An event cannot end before it starts.");
+                    }
+                    tasks.add(new Event(fromSections[0], from, to));
                     storage.save(tasks);
                     taskAdded(tasks.getLast(), tasks.size(), separator);
+
+                } else if (userInput.equals("date") || userInput.startsWith("date ")) {
+                    String dateText = userInput.substring(4).trim();
+                    LocalDate date;
+                    try {
+                        date = LocalDate.parse(dateText, DEADLINE_INPUT_FORMAT);
+                    } catch (DateTimeParseException exception) {
+                        throw new AliceException("Please use the date format yyyy-MM-dd.");
+                    }
+                    printTasksOnDate(tasks, date, separator);
 
                 } else if (userInput.equals("delete") || userInput.startsWith("delete ")) {
                     int taskNo = getTaskNumber(userInput, "delete", tasks.size());
@@ -136,6 +181,41 @@ public class Alice {
         System.out.println("Now you have " + taskNo + " tasks in the list.");
         System.out.println(separator);
 
+    }
+
+    // Used Codex to complete the stretch goal of checking tasks that fall in certain dates
+    /**
+     * Prints deadlines and events that occur on the given date.
+     * Example: date 2019-12-04
+     *
+     * @param tasks the tasks to search
+     * @param date the date to match
+     * @param separator the line used to separate console messages
+     */
+    private static void printTasksOnDate(ArrayList<Task> tasks, LocalDate date, String separator) {
+        boolean hasMatch = false;
+
+        for (int index = 0; index < tasks.size(); index++) {
+            Task task = tasks.get(index);
+            boolean isMatchingDeadline = task instanceof Deadline deadline
+                    && deadline.getBy().equals(date);
+            boolean isMatchingEvent = task instanceof Event event
+                    && !date.isBefore(event.getFrom().toLocalDate())
+                    && !date.isAfter(event.getTo().toLocalDate());
+            if (isMatchingDeadline || isMatchingEvent) {
+                if (!hasMatch) {
+                    System.out.println("Here are the tasks occurring on "
+                            + date.format(DATE_DISPLAY_FORMAT) + ":");
+                }
+                System.out.println("  " + (index + 1) + "." + task);
+                hasMatch = true;
+            }
+        }
+
+        if (!hasMatch) {
+            System.out.println("No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".");
+        }
+        System.out.println(separator);
     }
 
     /**
