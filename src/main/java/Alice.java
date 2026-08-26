@@ -12,6 +12,8 @@ public class Alice {
     // Used Codex to find out how to set Format and parse the input accordingly
     private static final DateTimeFormatter DEADLINE_INPUT_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_DISPLAY_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy");
     private static final DateTimeFormatter EVENT_INPUT_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
@@ -136,6 +138,16 @@ public class Alice {
                     storage.save(tasks);
                     taskAdded(tasks.getLast(), tasks.size(), separator);
 
+                } else if (userInput.equals("date") || userInput.startsWith("date ")) {
+                    String dateText = userInput.substring(4).trim();
+                    LocalDate date;
+                    try {
+                        date = LocalDate.parse(dateText, DEADLINE_INPUT_FORMAT);
+                    } catch (DateTimeParseException exception) {
+                        throw new AliceException("Please use the date format yyyy-MM-dd.");
+                    }
+                    printTasksOnDate(tasks, date, separator);
+
                 } else if (userInput.equals("delete") || userInput.startsWith("delete ")) {
                     int taskNo = getTaskNumber(userInput, "delete", tasks.size());
                     Task deletedTask = tasks.remove(taskNo - 1);
@@ -169,6 +181,41 @@ public class Alice {
         System.out.println("Now you have " + taskNo + " tasks in the list.");
         System.out.println(separator);
 
+    }
+
+    // Used Codex to complete the stretch goal of checking tasks that fall in certain dates
+    /**
+     * Prints deadlines and events that occur on the given date.
+     * Example: date 2019-12-04
+     *
+     * @param tasks the tasks to search
+     * @param date the date to match
+     * @param separator the line used to separate console messages
+     */
+    private static void printTasksOnDate(ArrayList<Task> tasks, LocalDate date, String separator) {
+        boolean hasMatch = false;
+
+        for (int index = 0; index < tasks.size(); index++) {
+            Task task = tasks.get(index);
+            boolean isMatchingDeadline = task instanceof Deadline deadline
+                    && deadline.getBy().equals(date);
+            boolean isMatchingEvent = task instanceof Event event
+                    && !date.isBefore(event.getFrom().toLocalDate())
+                    && !date.isAfter(event.getTo().toLocalDate());
+            if (isMatchingDeadline || isMatchingEvent) {
+                if (!hasMatch) {
+                    System.out.println("Here are the tasks occurring on "
+                            + date.format(DATE_DISPLAY_FORMAT) + ":");
+                }
+                System.out.println("  " + (index + 1) + "." + task);
+                hasMatch = true;
+            }
+        }
+
+        if (!hasMatch) {
+            System.out.println("No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".");
+        }
+        System.out.println(separator);
     }
 
     /**
