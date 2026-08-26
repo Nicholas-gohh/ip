@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -79,13 +82,21 @@ public class Storage {
                 if (parts.length != 4 || parts[3].isEmpty()) {
                     throw new AliceException("Invalid deadline task.");
                 }
-                yield new Deadline(parts[2], parts[3]);
+                try {
+                    yield new Deadline(parts[2], LocalDate.parse(parts[3]));
+                } catch (DateTimeParseException exception) {
+                    throw new AliceException("Invalid deadline date.");
+                }
             }
             case "E" -> {
                 if (parts.length != 5 || parts[3].isEmpty() || parts[4].isEmpty()) {
                     throw new AliceException("Invalid event task.");
                 }
-                yield new Event(parts[2], parts[3], parts[4]);
+                try {
+                    yield new Event(parts[2], LocalDateTime.parse(parts[3]), LocalDateTime.parse(parts[4]));
+                } catch (DateTimeParseException exception) {
+                    throw new AliceException("Invalid event date time.");
+                }
             }
             default -> throw new AliceException("Unknown task type.");
         };
