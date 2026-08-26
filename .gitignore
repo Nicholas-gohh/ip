@@ -20,5 +20,8 @@ _temp/
 /.codex/skills/
 /test/ui-test-plan.md
 
+# Alice's runtime task storage
+/data/
+
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
