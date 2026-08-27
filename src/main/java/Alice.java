@@ -2,7 +2,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Scanner; //in order to get inputs from user
 
 /**
  * Runs the Alice bot.
@@ -11,8 +10,6 @@ public class Alice {
     // Used Codex to find out how to set Format and parse the input accordingly
     private static final DateTimeFormatter DEADLINE_INPUT_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter DATE_DISPLAY_FORMAT =
-            DateTimeFormatter.ofPattern("MMM dd yyyy");
     private static final DateTimeFormatter EVENT_INPUT_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
@@ -22,41 +19,21 @@ public class Alice {
      * @param args command-line arguments, which are not used
      */
     public static void main(String[] args) {
-        String separator = "_______________________________________";
-        // Used Codex to redesign banner
-        String banner = separator + "\n"
-                + "    _    _     ___ ____ _____ \n"
-                + "   / \\  | |   |_ _/ ___| ____|\n"
-                + "  / _ \\ | |    | | |   |  _|  \n"
-                + " / ___ \\| |___ | | |___| |___ \n"
-                + "/_/   \\_\\_____|___\\____|_____|\n"
-                + "Hello! I'm Alice.\n"
-                + "What can I do for you?\n"
-                + separator;
- //               + "Bye. Hope to see you again soon!\n"
- //               + separator;
-        System.out.println(banner);
-
-        // Used Codex to find how to take in inputs from user
-        Scanner scanner = new Scanner(System.in); //object to read
+        Ui ui = new Ui();
+        ui.showWelcome();
         // Load existing tasks
         Storage storage = new Storage();
         TaskList tasks = new TaskList(storage.load());
         while (true) {
-            String userInput = scanner.nextLine(); // take in input
-            System.out.println(separator);
+            String userInput = ui.readCommand();
+            ui.showSeparator();
             try {
                 if (userInput.equals("bye")) { // check for exit
-                    System.out.println("Bye. Hope to see you again soon!");
-                    System.out.println(separator);
+                    ui.showGoodbye();
                     break;
 
                 } else if (userInput.equals("list")) { // print the list
-                    System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println("  " + (i + 1) + "." + tasks.get(i));
-                    }
-                    System.out.println(separator);
+                    ui.showTaskList(tasks);
 
                 } else if (userInput.equals("mark") || userInput.startsWith("mark ")) { // Used Codex to figure out if statements for mark and unmark
                     int taskNo = getTaskNumber(userInput, "mark", tasks.size());
@@ -67,9 +44,7 @@ public class Alice {
                     }
                     task.markAsDone();
                     storage.save(tasks.asList());
-                    System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  " + task);
-                    System.out.println(separator);
+                    ui.showTaskMarked(task);
 
                 } else if (userInput.equals("unmark") || userInput.startsWith("unmark ")) {
                     int taskNo = getTaskNumber(userInput, "unmark", tasks.size());
@@ -80,9 +55,7 @@ public class Alice {
                     }
                     task.unmarkAsDone();
                     storage.save(tasks.asList());
-                    System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  " + task);
-                    System.out.println(separator);
+                    ui.showTaskUnmarked(task);
 
                 } else if (userInput.equals("todo") || userInput.startsWith("todo ")) {
                     // Remove first 4 chars
@@ -93,7 +66,7 @@ public class Alice {
                     Task task = new ToDo(description);
                     tasks.add(task);
                     storage.save(tasks.asList());
-                    taskAdded(task, tasks.size(), separator);
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else if (userInput.equals("deadline") || userInput.startsWith("deadline ")) { //found how to split using Codex
                     // Remove first 8 chars, then split the remaining string with "/by" into 2
@@ -110,7 +83,7 @@ public class Alice {
                     Task task = new Deadline(sections[0], by);
                     tasks.add(task);
                     storage.save(tasks.asList());
-                    taskAdded(task, tasks.size(), separator);
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else if (userInput.equals("event") || userInput.startsWith("event ")) { //found how to split using Codex
                     // Remove first 5 chars, then split the remaining string with "/from" into 2
@@ -138,7 +111,7 @@ public class Alice {
                     Task task = new Event(fromSections[0], from, to);
                     tasks.add(task);
                     storage.save(tasks.asList());
-                    taskAdded(task, tasks.size(), separator);
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else if (userInput.equals("date") || userInput.startsWith("date ")) {
                     String dateText = userInput.substring(4).trim();
@@ -148,76 +121,22 @@ public class Alice {
                     } catch (DateTimeParseException exception) {
                         throw new AliceException("Please use the date format yyyy-MM-dd.");
                     }
-                    printTasksOnDate(tasks, date, separator);
+                    ui.showTasksOnDate(tasks, date);
 
                 } else if (userInput.equals("delete") || userInput.startsWith("delete ")) {
                     int taskNo = getTaskNumber(userInput, "delete", tasks.size());
                     Task deletedTask = tasks.remove(taskNo - 1);
                     storage.save(tasks.asList());
 
-                    System.out.println("Noted. I've removed this task:");
-                    System.out.println("  " + deletedTask);
-                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-                    System.out.println(separator);
+                    ui.showTaskDeleted(deletedTask, tasks.size());
 
                 } else { // Throw error
                     throw new AliceException("I don't understand that command.");
                 }
             } catch (AliceException e) {
-                System.out.println(e.getMessage());
-                System.out.println(separator);
+                ui.showError(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Prints the confirmation message after a task has been added.
-     *
-     * @param task the task that was added
-     * @param taskNo the new number of tasks in the list
-     * @param separator the line used to separate console messages
-     */
-    private static void taskAdded(Task task, int taskNo, String separator) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
-        System.out.println("Now you have " + taskNo + " tasks in the list.");
-        System.out.println(separator);
-
-    }
-
-    // Used Codex to complete the stretch goal of checking tasks that fall in certain dates
-    /**
-     * Prints deadlines and events that occur on the given date.
-     * Example: date 2019-12-04
-     *
-     * @param tasks the tasks to search
-     * @param date the date to match
-     * @param separator the line used to separate console messages
-     */
-    private static void printTasksOnDate(TaskList tasks, LocalDate date, String separator) {
-        boolean hasMatch = false;
-
-        for (int index = 0; index < tasks.size(); index++) {
-            Task task = tasks.get(index);
-            boolean isMatchingDeadline = task instanceof Deadline deadline
-                    && deadline.getBy().equals(date);
-            boolean isMatchingEvent = task instanceof Event event
-                    && !date.isBefore(event.getFrom().toLocalDate())
-                    && !date.isAfter(event.getTo().toLocalDate());
-            if (isMatchingDeadline || isMatchingEvent) {
-                if (!hasMatch) {
-                    System.out.println("Here are the tasks occurring on "
-                            + date.format(DATE_DISPLAY_FORMAT) + ":");
-                }
-                System.out.println("  " + (index + 1) + "." + task);
-                hasMatch = true;
-            }
-        }
-
-        if (!hasMatch) {
-            System.out.println("No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".");
-        }
-        System.out.println(separator);
     }
 
     /**
