@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -136,26 +137,15 @@ public class Ui {
      * @param date the date to match
      */
     public void showTasksOnDate(TaskList tasks, LocalDate date) {
-        boolean hasMatch = false;
-        for (int index = 0; index < tasks.size(); index++) {
-            Task task = tasks.get(index);
-            boolean isMatchingDeadline = task instanceof Deadline deadline
-                    && deadline.getBy().equals(date);
-            boolean isMatchingEvent = task instanceof Event event
-                    && !date.isBefore(event.getFrom().toLocalDate())
-                    && !date.isAfter(event.getTo().toLocalDate());
-            if (isMatchingDeadline || isMatchingEvent) {
-                if (!hasMatch) {
-                    System.out.println("Here are the tasks occurring on "
-                            + date.format(DATE_DISPLAY_FORMAT) + ":");
-                }
-                System.out.println("  " + (index + 1) + "." + task);
-                hasMatch = true;
-            }
-        }
-
-        if (!hasMatch) {
+        List<Task> matchingTasks = tasks.getTasksOnDate(date);
+        if (matchingTasks.isEmpty()) {
             System.out.println("No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".");
+        } else {
+            System.out.println("Here are the tasks occurring on "
+                    + date.format(DATE_DISPLAY_FORMAT) + ":");
+            for (Task task : matchingTasks) {
+                System.out.println("  " + (tasks.indexOf(task) + 1) + "." + task);
+            }
         }
         showSeparator();
     }
