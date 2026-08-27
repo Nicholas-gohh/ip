@@ -3,7 +3,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner; //in order to get inputs from user
-import java.util.ArrayList;
 
 /**
  * Runs the Alice bot.
@@ -42,7 +41,7 @@ public class Alice {
         Scanner scanner = new Scanner(System.in); //object to read
         // Load existing tasks
         Storage storage = new Storage();
-        ArrayList<Task> tasks = storage.load();
+        TaskList tasks = new TaskList(storage.load());
         while (true) {
             String userInput = scanner.nextLine(); // take in input
             System.out.println(separator);
@@ -67,7 +66,7 @@ public class Alice {
                         throw new AliceException("This task is already marked as done.");
                     }
                     task.markAsDone();
-                    storage.save(tasks);
+                    storage.save(tasks.asList());
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + task);
                     System.out.println(separator);
@@ -80,7 +79,7 @@ public class Alice {
                         throw new AliceException("This task is already marked as not done.");
                     }
                     task.unmarkAsDone();
-                    storage.save(tasks);
+                    storage.save(tasks.asList());
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + task);
                     System.out.println(separator);
@@ -91,9 +90,10 @@ public class Alice {
                     if (description.isEmpty()) {
                         throw new AliceException("The description of a todo cannot be empty.");
                     }
-                    tasks.add(new ToDo(description));
-                    storage.save(tasks);
-                    taskAdded(tasks.getLast(), tasks.size(), separator);
+                    Task task = new ToDo(description);
+                    tasks.add(task);
+                    storage.save(tasks.asList());
+                    taskAdded(task, tasks.size(), separator);
 
                 } else if (userInput.equals("deadline") || userInput.startsWith("deadline ")) { //found how to split using Codex
                     // Remove first 8 chars, then split the remaining string with "/by" into 2
@@ -107,9 +107,10 @@ public class Alice {
                     } catch (DateTimeParseException exception) {
                         throw new AliceException("Please use the date format yyyy-MM-dd.");
                     }
-                    tasks.add(new Deadline(sections[0], by));
-                    storage.save(tasks);
-                    taskAdded(tasks.getLast(), tasks.size(), separator);
+                    Task task = new Deadline(sections[0], by);
+                    tasks.add(task);
+                    storage.save(tasks.asList());
+                    taskAdded(task, tasks.size(), separator);
 
                 } else if (userInput.equals("event") || userInput.startsWith("event ")) { //found how to split using Codex
                     // Remove first 5 chars, then split the remaining string with "/from" into 2
@@ -134,9 +135,10 @@ public class Alice {
                     if (to.isBefore(from)) {
                         throw new AliceException("An event cannot end before it starts.");
                     }
-                    tasks.add(new Event(fromSections[0], from, to));
-                    storage.save(tasks);
-                    taskAdded(tasks.getLast(), tasks.size(), separator);
+                    Task task = new Event(fromSections[0], from, to);
+                    tasks.add(task);
+                    storage.save(tasks.asList());
+                    taskAdded(task, tasks.size(), separator);
 
                 } else if (userInput.equals("date") || userInput.startsWith("date ")) {
                     String dateText = userInput.substring(4).trim();
@@ -151,7 +153,7 @@ public class Alice {
                 } else if (userInput.equals("delete") || userInput.startsWith("delete ")) {
                     int taskNo = getTaskNumber(userInput, "delete", tasks.size());
                     Task deletedTask = tasks.remove(taskNo - 1);
-                    storage.save(tasks);
+                    storage.save(tasks.asList());
 
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + deletedTask);
@@ -192,7 +194,7 @@ public class Alice {
      * @param date the date to match
      * @param separator the line used to separate console messages
      */
-    private static void printTasksOnDate(ArrayList<Task> tasks, LocalDate date, String separator) {
+    private static void printTasksOnDate(TaskList tasks, LocalDate date, String separator) {
         boolean hasMatch = false;
 
         for (int index = 0; index < tasks.size(); index++) {
