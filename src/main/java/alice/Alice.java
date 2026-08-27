@@ -1,5 +1,6 @@
 package alice;
 
+// Used Codex to do OOP of classes.
 import alice.exception.AliceException;
 import alice.parser.Parser;
 import alice.storage.Storage;
