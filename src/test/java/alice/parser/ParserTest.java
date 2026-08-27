@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 class ParserTest {
     private final Parser parser = new Parser();
 
+    /** Verifies that valid task commands create task objects with the supplied details. */
     @Test
     void parseTask_validTaskCommands_createsCorrectTasks() throws AliceException {
         Task todo = parser.parseTask("todo read book");
@@ -34,6 +35,7 @@ class ParserTest {
         assertEquals(LocalDateTime.of(2019, 12, 2, 16, 0), parsedEvent.getTo());
     }
 
+    /** Verifies that malformed task commands report their specific validation errors. */
     @Test
     void parseTask_unknownOrIncompleteCommand_throwsHelpfulException() {
         AliceException unknownCommand = assertThrows(AliceException.class,
@@ -48,11 +50,13 @@ class ParserTest {
         assertEquals("An event cannot end before it starts.", backwardsEvent.getMessage());
     }
 
+    /** Verifies that a valid one-based task number is returned unchanged. */
     @Test
     void parseTaskNumber_validNumber_returnsOneBasedTaskNumber() throws AliceException {
         assertEquals(2, parser.parseTaskNumber("mark 2", "mark", 3));
     }
 
+    /** Verifies that missing, non-numeric, and out-of-range task numbers are rejected. */
     @Test
     void parseTaskNumber_invalidNumbers_throwHelpfulException() {
         AliceException missingNumber = assertThrows(AliceException.class,
@@ -67,6 +71,7 @@ class ParserTest {
         assertEquals("There is no task numbered 3.", outOfRangeNumber.getMessage());
     }
 
+    /** Verifies that date input is parsed or rejected with the expected message. */
     @Test
     void parseDate_validAndInvalidDates_returnsDateOrThrowsHelpfulException() throws AliceException {
         assertEquals(LocalDate.of(2019, 12, 2), parser.parseDate("date 2019-12-02"));
