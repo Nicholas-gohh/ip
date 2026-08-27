@@ -1,11 +1,12 @@
 package alice.ui;
 
-import alice.task.Task;
-import alice.task.TaskList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
+
+import alice.task.Task;
+import alice.task.TaskList;
 
 /**
  * Handles Alice's console input and output.
@@ -42,7 +43,7 @@ public class Ui {
     /**
      * Reads the next command entered by the user.
      *
-     * @return the command entered by the user
+     * @return the command entered by the user.
      */
     public String readCommand() {
         return scanner.nextLine();
@@ -66,7 +67,7 @@ public class Ui {
     /**
      * Displays every task in the task list.
      *
-     * @param tasks the tasks to display
+     * @param tasks the tasks to display.
      */
     public void showTaskList(TaskList tasks) {
         System.out.println("Here are the tasks in your list:");
@@ -79,8 +80,8 @@ public class Ui {
     /**
      * Displays the confirmation for a newly added task.
      *
-     * @param task the task that was added
-     * @param taskCount the new number of tasks in the list
+     * @param task the task that was added.
+     * @param taskCount the new number of tasks in the list.
      */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
@@ -92,7 +93,7 @@ public class Ui {
     /**
      * Displays the confirmation for a completed task.
      *
-     * @param task the task that was marked as done
+     * @param task the task that was marked as done.
      */
     public void showTaskMarked(Task task) {
         System.out.println("Nice! I've marked this task as done:");
@@ -103,7 +104,7 @@ public class Ui {
     /**
      * Displays the confirmation for an incomplete task.
      *
-     * @param task the task that was marked as not done
+     * @param task the task that was marked as not done.
      */
     public void showTaskUnmarked(Task task) {
         System.out.println("OK, I've marked this task as not done yet:");
@@ -114,8 +115,8 @@ public class Ui {
     /**
      * Displays the confirmation for a deleted task.
      *
-     * @param task the task that was removed
-     * @param taskCount the number of tasks remaining in the list
+     * @param task the task that was removed.
+     * @param taskCount the number of tasks remaining in the list.
      */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println("Noted. I've removed this task:");
@@ -127,7 +128,7 @@ public class Ui {
     /**
      * Displays an error message.
      *
-     * @param message the error message to display
+     * @param message the error message to display.
      */
     public void showError(String message) {
         System.out.println(message);
@@ -137,8 +138,8 @@ public class Ui {
     /**
      * Displays the deadlines and events that occur on the given date.
      *
-     * @param tasks the tasks to search and display
-     * @param date the date to match
+     * @param tasks the tasks to search and display.
+     * @param date the date to match.
      */
     public void showTasksOnDate(TaskList tasks, LocalDate date) {
         List<Task> matchingTasks = tasks.getTasksOnDate(date);
