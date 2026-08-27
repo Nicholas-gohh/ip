@@ -15,9 +15,9 @@ public class Event extends Task {
     /**
      * Creates an event task.
      *
-     * @param description the task description
-     * @param from the event start date and time
-     * @param to the event end date and time
+     * @param description the task description.
+     * @param from the event start date and time.
+     * @param to the event end date and time.
      */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
         super(description);
@@ -38,7 +38,7 @@ public class Event extends Task {
     /**
      * Returns this event task in Alice's display format.
      *
-     * @return the formatted event task
+     * @return the formatted event task.
      */
     @Override
     public String toString() {

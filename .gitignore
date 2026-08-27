@@ -1,5 +1,5 @@
 # IDEA files
-/.idea/
+**/.idea/
 /out/
 /*.iml
 
@@ -17,7 +17,11 @@ bin/
 _temp/
 
 # Project-local Codex skills and their UI test plan
-/.codex/skills/
+/.codex/skills/*
+!/.codex/skills/seedu-java-coding-standard/
+!/.codex/skills/seedu-java-coding-standard/**
+!/.codex/skills/seedu-git-standard/
+!/.codex/skills/seedu-git-standard/**
 /test/ui-test-plan.md
 
 # Alice's runtime task storage

@@ -10,7 +10,7 @@ public class Task {
     /**
      * Creates a task with the given description.
      *
-     * @param description the task description
+     * @param description the task description.
      */
     public Task(String description) {
         this.description = description;
@@ -20,10 +20,10 @@ public class Task {
     /**
      * Returns the icon representing the task's completion status.
      *
-     * @return {@code [X]} when complete, otherwise {@code [ ]}
+     * @return {@code [X]} when complete, otherwise {@code [ ]}.
      */
     public String getStatusIcon() {
-        return (isDone ? "[X]" : "[ ]"); // mark done task with X
+        return isDone ? "[X]" : "[ ]";
     }
 
     /** Returns whether this task has been completed. */
@@ -49,7 +49,7 @@ public class Task {
     /**
      * Returns the task status and description for display.
      *
-     * @return a display representation of this task
+     * @return a display representation of this task.
      */
     @Override
     public String toString() {

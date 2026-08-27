@@ -1,22 +1,23 @@
 package alice.storage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+
 import alice.exception.AliceException;
 import alice.task.Deadline;
 import alice.task.Event;
 import alice.task.Task;
 import alice.task.ToDo;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 
-// Used Codex to do the descriptions of the class and methods
-// Also use Codex to help with the code of accessing files
+// Used Codex to draft the class and method descriptions.
+// Used Codex to help implement file access.
 /**
  * Saves Alice tasks to, and loads them from, data/Alice.txt.
  */
@@ -36,10 +37,12 @@ public class Storage {
     /**
      * Converts a task into one line in readable storage.
      *
-     * @throws AliceException if the task is not valid
+     * @param task the task to format.
+     * @return the task's storage representation.
+     * @throws AliceException if the task is not valid.
      */
     private String formatTask(Task task) throws AliceException {
-        String status = task.isDone() ? "1" : "0"; //If done is 1, else 0
+        String status = task.isDone() ? "1" : "0";
         switch (task) {
             case ToDo toDo -> {
                 return "T | " + status + " | " + task.getDescription();
@@ -61,23 +64,25 @@ public class Storage {
     /**
      * Converts one storage line into a task.
      *
-     * @throws AliceException if the line does not follow the expected format
+     * @param line the storage line to parse.
+     * @return the task represented by the storage line.
+     * @throws AliceException if the line does not follow the expected format.
      */
     private Task parseTask(String line) throws AliceException {
-        // Split the line with '|' into parts with no limits. '\\' needed as '|' is or
+        // Preserve trailing empty fields while splitting on the storage delimiter.
         String[] parts = line.split("\\|", -1);
 
         for (int index = 0; index < parts.length; index++) {
             parts[index] = parts[index].trim();
         }
 
-        // Check the 2nd and 3rd part for validity
+        // Validate the task status and description.
         if (parts.length < 3 || parts[2].isEmpty()
                 || (!parts[1].equals("0") && !parts[1].equals("1"))) {
             throw new AliceException("Invalid saved task.");
         }
 
-        // Assign the task into their specific type according to first part
+        // Create the task subtype identified by the first field.
         Task task = switch (parts[0]) {
             case "T" -> {
                 if (parts.length != 3) {
@@ -100,7 +105,8 @@ public class Storage {
                     throw new AliceException("Invalid event task.");
                 }
                 try {
-                    yield new Event(parts[2], LocalDateTime.parse(parts[3]), LocalDateTime.parse(parts[4]));
+                    yield new Event(parts[2], LocalDateTime.parse(parts[3]),
+                            LocalDateTime.parse(parts[4]));
                 } catch (DateTimeParseException exception) {
                     throw new AliceException("Invalid event date time.");
                 }
@@ -118,7 +124,7 @@ public class Storage {
      * Loads all valid tasks from disk.
      * Creates an empty storage file if Alice is being run for the first time.
      *
-     * @return the successfully loaded tasks
+     * @return the successfully loaded tasks.
      */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -141,8 +147,8 @@ public class Storage {
     /**
      * Replaces the storage file contents with the current task list.
      *
-     * @param tasks tasks that should be saved
-     * @throws AliceException if the file cannot be written
+     * @param tasks tasks that should be saved.
+     * @throws AliceException if the file cannot be written.
      */
     public void save(List<Task> tasks) throws AliceException {
         ArrayList<String> lines = new ArrayList<>();
@@ -153,8 +159,8 @@ public class Storage {
         try {
             createFileIfMissing();
             Files.write(FILE_PATH, lines,
-                    StandardOpenOption.TRUNCATE_EXISTING, // clear old contents
-                    StandardOpenOption.WRITE); // write the tasks
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE);
         } catch (IOException exception) {
             throw new AliceException("Unable to save tasks to " + FILE_PATH + ".");
         }

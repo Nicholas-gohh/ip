@@ -15,7 +15,7 @@ public class Alice {
     /**
      * Starts Alice and processes commands until the user enters {@code bye}.
      *
-     * @param args command-line arguments, which are not used
+     * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
         Ui ui = new Ui();
@@ -28,16 +28,16 @@ public class Alice {
             String command = parser.getCommandWord(userInput);
             ui.showSeparator();
             try {
-                if (userInput.equals("bye")) { // check for exit
+                if (userInput.equals("bye")) {
                     ui.showGoodbye();
                     break;
 
-                } else if (userInput.equals("list")) { // print the list
+                } else if (userInput.equals("list")) {
                     ui.showTaskList(tasks);
 
                 } else if (command.equals("mark")) {
-                    int taskNo = parser.parseTaskNumber(userInput, "mark", tasks.size());
-                    Task task = tasks.get(taskNo - 1); // 5th task means 4 in array
+                    int taskNumber = parser.parseTaskNumber(userInput, "mark", tasks.size());
+                    Task task = tasks.get(taskNumber - 1);
 
                     if (task.isDone()) {
                         throw new AliceException("This task is already marked as done.");
@@ -47,8 +47,8 @@ public class Alice {
                     ui.showTaskMarked(task);
 
                 } else if (command.equals("unmark")) {
-                    int taskNo = parser.parseTaskNumber(userInput, "unmark", tasks.size());
-                    Task task = tasks.get(taskNo - 1); // 5th task means 4 in array
+                    int taskNumber = parser.parseTaskNumber(userInput, "unmark", tasks.size());
+                    Task task = tasks.get(taskNumber - 1);
 
                     if (!task.isDone()) {
                         throw new AliceException("This task is already marked as not done.");
@@ -67,13 +67,13 @@ public class Alice {
                     ui.showTasksOnDate(tasks, parser.parseDate(userInput));
 
                 } else if (command.equals("delete")) {
-                    int taskNo = parser.parseTaskNumber(userInput, "delete", tasks.size());
-                    Task deletedTask = tasks.remove(taskNo - 1);
+                    int taskNumber = parser.parseTaskNumber(userInput, "delete", tasks.size());
+                    Task deletedTask = tasks.remove(taskNumber - 1);
                     storage.save(tasks.asList());
 
                     ui.showTaskDeleted(deletedTask, tasks.size());
 
-                } else { // Throw error
+                } else {
                     throw new AliceException("I don't understand that command.");
                 }
             } catch (AliceException e) {
@@ -81,5 +81,4 @@ public class Alice {
             }
         }
     }
-
 }
