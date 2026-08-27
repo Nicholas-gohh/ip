@@ -80,4 +80,13 @@ class ParserTest {
                 () -> parser.parseDate("date 2019-13-02"));
         assertEquals("Please use the date format yyyy-MM-dd.", exception.getMessage());
     }
+
+    @Test
+    void parseKeyword_presentOrEmptyKeyword_returnsKeywordOrThrowsHelpfulException() throws AliceException {
+        assertEquals("book", parser.parseKeyword("find book"));
+
+        AliceException exception = assertThrows(AliceException.class,
+                () -> parser.parseKeyword("find"));
+        assertEquals("Please provide a keyword to find.", exception.getMessage());
+    }
 }
