@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 class TaskListTest {
     private static final LocalDate DATE = LocalDate.of(2019, 12, 2);
 
+    /** Verifies that the default constructor creates an empty task list. */
     @Test
     void constructor_emptyList_createsEmptyTaskList() {
         TaskList tasks = new TaskList();
@@ -25,6 +26,7 @@ class TaskListTest {
         assertEquals(List.of(), tasks.asList());
     }
 
+    /** Verifies that the constructor copies, rather than shares, the supplied task list. */
     @Test
     void constructor_suppliedTasks_copiesSuppliedTasks() {
         ToDo todo = new ToDo("read book");
@@ -37,6 +39,7 @@ class TaskListTest {
         assertEquals(todo, tasks.get(0));
     }
 
+    /** Verifies that an added task can be retrieved at its inserted position. */
     @Test
     void addAndGet_newTask_returnsTaskAtAddedPosition() {
         TaskList tasks = new TaskList();
@@ -48,6 +51,7 @@ class TaskListTest {
         assertEquals(todo, tasks.get(0));
     }
 
+    /** Verifies that removing a task returns it and closes the resulting list gap. */
     @Test
     void remove_taskAtIndex_returnsAndRemovesTask() {
         ToDo firstTask = new ToDo("read book");
@@ -61,6 +65,7 @@ class TaskListTest {
         assertEquals(secondTask, tasks.get(0));
     }
 
+    /** Verifies that a task snapshot cannot be modified or changed by later additions. */
     @Test
     void asList_tasksAdded_returnsImmutableSnapshotOfTasks() {
         ToDo firstTask = new ToDo("read book");
@@ -74,6 +79,7 @@ class TaskListTest {
         assertThrows(UnsupportedOperationException.class, () -> savedTasks.add(secondTask));
     }
 
+    /** Verifies that task lookup returns the task position or {@code -1} when absent. */
     @Test
     void indexOf_presentAndAbsentTasks_returnsIndexOrMinusOne() {
         ToDo firstTask = new ToDo("read book");
@@ -84,6 +90,7 @@ class TaskListTest {
         assertEquals(-1, tasks.indexOf(secondTask));
     }
 
+    /** Verifies that a deadline is returned when its due date matches the requested date. */
     @Test
     void getTasksOnDate_deadlineOnRequestedDate_returnsDeadline() {
         Deadline deadline = new Deadline("return book", DATE);
@@ -92,6 +99,7 @@ class TaskListTest {
         assertEquals(List.of(deadline), tasks.getTasksOnDate(DATE));
     }
 
+    /** Verifies that an event covering the requested date is returned. */
     @Test
     void getTasksOnDate_eventSpanningRequestedDate_returnsEvent() {
         Event event = new Event("overnight trip",
@@ -102,6 +110,7 @@ class TaskListTest {
         assertEquals(List.of(event), tasks.getTasksOnDate(DATE));
     }
 
+    /** Verifies that events beginning or ending on the requested date are returned. */
     @Test
     void getTasksOnDate_eventStartsOrEndsOnRequestedDate_returnsEvent() {
         Event startsOnDate = new Event("morning meeting",
@@ -115,6 +124,7 @@ class TaskListTest {
         assertEquals(List.of(startsOnDate, endsOnDate), tasks.getTasksOnDate(DATE));
     }
 
+    /** Verifies that undated tasks and tasks on other dates are excluded from the result. */
     @Test
     void getTasksOnDate_todoAndTasksOnOtherDates_returnsEmptyList() {
         ToDo todo = new ToDo("read book");
