@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,5 +69,49 @@ public class TaskList {
      */
     public List<Task> asList() {
         return List.copyOf(tasks);
+    }
+
+    /**
+     * Returns the deadlines and events that occur on the specified date.
+     *
+     * @param date the date to match
+     * @return the tasks occurring on the specified date
+     */
+    public List<Task> getTasksOnDate(LocalDate date) {
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (occursOn(task, date)) {
+                matchingTasks.add(task);
+            }
+        }
+        return matchingTasks;
+    }
+
+    /**
+     * Returns the zero-based position of a task in this list.
+     *
+     * @param task the task to locate
+     * @return the zero-based position of the task
+     */
+    public int indexOf(Task task) {
+        return tasks.indexOf(task);
+    }
+
+    /**
+     * Returns whether a task's date or date range includes the specified date.
+     *
+     * @param task the task to check
+     * @param date the date to match
+     * @return whether the task occurs on the specified date
+     */
+    private boolean occursOn(Task task, LocalDate date) {
+        if (task instanceof Deadline deadline) {
+            return deadline.getBy().equals(date);
+        }
+        if (task instanceof Event event) {
+            return !date.isBefore(event.getFrom().toLocalDate())
+                    && !date.isAfter(event.getTo().toLocalDate());
+        }
+        return false;
     }
 }
