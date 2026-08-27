@@ -1,3 +1,13 @@
+package alice;
+
+// Used Codex to do OOP of classes.
+import alice.exception.AliceException;
+import alice.parser.Parser;
+import alice.storage.Storage;
+import alice.task.Task;
+import alice.task.TaskList;
+import alice.ui.Ui;
+
 /**
  * Runs the Alice bot.
  */

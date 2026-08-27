@@ -1,3 +1,5 @@
+package alice.exception;
+
 /**
  * Represents an error caused by invalid Alice input or task storage data.
  */
