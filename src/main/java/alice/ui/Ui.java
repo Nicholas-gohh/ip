@@ -153,4 +153,23 @@ public class Ui {
         }
         showSeparator();
     }
+
+    /**
+     * Displays the tasks whose descriptions contain a keyword.
+     *
+     * @param tasks the tasks to search and display
+     * @param keyword the keyword to match
+     */
+    public void showMatchingTasks(TaskList tasks, String keyword) {
+        List<Task> matchingTasks = tasks.getTasksWithKeyword(keyword);
+        if (matchingTasks.isEmpty()) {
+            System.out.println("No matching tasks found.");
+        } else {
+            System.out.println("Here are the matching tasks in your list:");
+            for (Task task : matchingTasks) {
+                System.out.println("  " + (tasks.indexOf(task) + 1) + "." + task);
+            }
+        }
+        showSeparator();
+    }
 }

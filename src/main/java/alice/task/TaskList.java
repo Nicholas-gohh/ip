@@ -3,6 +3,7 @@ package alice.task;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Stores and manages the tasks currently known by Alice.
@@ -83,6 +84,23 @@ public class TaskList {
         ArrayList<Task> matchingTasks = new ArrayList<>();
         for (Task task : tasks) {
             if (occursOn(task, date)) {
+                matchingTasks.add(task);
+            }
+        }
+        return matchingTasks;
+    }
+
+    /**
+     * Returns tasks whose descriptions contain the specified keyword, ignoring case.
+     *
+     * @param keyword the text to search for in task descriptions
+     * @return the matching tasks in their original order
+     */
+    public List<Task> getTasksWithKeyword(String keyword) {
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword)) {
                 matchingTasks.add(task);
             }
         }

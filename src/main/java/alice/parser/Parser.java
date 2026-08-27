@@ -89,6 +89,21 @@ public class Parser {
     }
 
     /**
+     * Parses the keyword supplied to a find command.
+     *
+     * @param userInput the complete find command
+     * @return the keyword to search for
+     * @throws AliceException if the keyword is empty
+     */
+    public String parseKeyword(String userInput) throws AliceException {
+        String keyword = userInput.substring("find".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new AliceException("Please provide a keyword to find.");
+        }
+        return keyword;
+    }
+
+    /**
      * Creates a todo task from its command.
      *
      * @param userInput the complete todo command

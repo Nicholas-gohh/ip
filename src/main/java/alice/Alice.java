@@ -66,6 +66,9 @@ public class Alice {
                 } else if (command.equals("date")) {
                     ui.showTasksOnDate(tasks, parser.parseDate(userInput));
 
+                } else if (command.equals("find")) {
+                    ui.showMatchingTasks(tasks, parser.parseKeyword(userInput));
+
                 } else if (command.equals("delete")) {
                     int taskNo = parser.parseTaskNumber(userInput, "delete", tasks.size());
                     Task deletedTask = tasks.remove(taskNo - 1);

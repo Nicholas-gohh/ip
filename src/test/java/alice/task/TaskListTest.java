@@ -123,4 +123,21 @@ class TaskListTest {
 
         assertEquals(List.of(), tasks.getTasksOnDate(DATE));
     }
+
+    @Test
+    void getTasksWithKeyword_matchingDescriptionsIgnoringCase_returnsMatchingTasksInOrder() {
+        ToDo firstMatch = new ToDo("read book");
+        Deadline secondMatch = new Deadline("return BOOK", DATE);
+        ToDo nonMatchingTask = new ToDo("buy milk");
+        TaskList tasks = new TaskList(List.of(firstMatch, secondMatch, nonMatchingTask));
+
+        assertEquals(List.of(firstMatch, secondMatch), tasks.getTasksWithKeyword("book"));
+    }
+
+    @Test
+    void getTasksWithKeyword_noMatchingDescriptions_returnsEmptyList() {
+        TaskList tasks = new TaskList(List.of(new ToDo("read book")));
+
+        assertEquals(List.of(), tasks.getTasksWithKeyword("milk"));
+    }
 }
