@@ -1,3 +1,7 @@
+package alice.ui;
+
+import alice.task.Task;
+import alice.task.TaskList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
