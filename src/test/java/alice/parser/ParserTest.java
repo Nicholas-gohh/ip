@@ -8,12 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.Test;
+
 import alice.exception.AliceException;
 import alice.task.Deadline;
 import alice.task.Event;
 import alice.task.Task;
 import alice.task.ToDo;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests conversion and validation of Alice command input.
@@ -38,12 +39,13 @@ class ParserTest {
     /** Verifies that malformed task commands report their specific validation errors. */
     @Test
     void parseTask_unknownOrIncompleteCommand_throwsHelpfulException() {
-        AliceException unknownCommand = assertThrows(AliceException.class,
-                () -> parser.parseTask("remind me"));
-        AliceException incompleteDeadline = assertThrows(AliceException.class,
-                () -> parser.parseTask("deadline return book"));
-        AliceException backwardsEvent = assertThrows(AliceException.class,
-                () -> parser.parseTask("event meeting /from 2019-12-02 1600 /to 2019-12-02 1400"));
+        AliceException unknownCommand = assertThrows(
+                AliceException.class, () -> parser.parseTask("remind me"));
+        AliceException incompleteDeadline = assertThrows(
+                AliceException.class, () -> parser.parseTask("deadline return book"));
+        AliceException backwardsEvent = assertThrows(
+                AliceException.class, () -> parser.parseTask(
+                        "event meeting /from 2019-12-02 1600 /to 2019-12-02 1400"));
 
         assertEquals("I don't understand that command.", unknownCommand.getMessage());
         assertEquals("A deadline needs a description and a /by date.", incompleteDeadline.getMessage());
@@ -59,12 +61,12 @@ class ParserTest {
     /** Verifies that missing, non-numeric, and out-of-range task numbers are rejected. */
     @Test
     void parseTaskNumber_invalidNumbers_throwHelpfulException() {
-        AliceException missingNumber = assertThrows(AliceException.class,
-                () -> parser.parseTaskNumber("delete", "delete", 2));
-        AliceException nonNumericNumber = assertThrows(AliceException.class,
-                () -> parser.parseTaskNumber("mark two", "mark", 2));
-        AliceException outOfRangeNumber = assertThrows(AliceException.class,
-                () -> parser.parseTaskNumber("unmark 3", "unmark", 2));
+        AliceException missingNumber = assertThrows(
+                AliceException.class, () -> parser.parseTaskNumber("delete", "delete", 2));
+        AliceException nonNumericNumber = assertThrows(
+                AliceException.class, () -> parser.parseTaskNumber("mark two", "mark", 2));
+        AliceException outOfRangeNumber = assertThrows(
+                AliceException.class, () -> parser.parseTaskNumber("unmark 3", "unmark", 2));
 
         assertEquals("Please provide a task number to delete.", missingNumber.getMessage());
         assertEquals("The task number must be a positive whole number.", nonNumericNumber.getMessage());
@@ -76,8 +78,8 @@ class ParserTest {
     void parseDate_validAndInvalidDates_returnsDateOrThrowsHelpfulException() throws AliceException {
         assertEquals(LocalDate.of(2019, 12, 2), parser.parseDate("date 2019-12-02"));
 
-        AliceException exception = assertThrows(AliceException.class,
-                () -> parser.parseDate("date 2019-13-02"));
+        AliceException exception = assertThrows(
+                AliceException.class, () -> parser.parseDate("date 2019-13-02"));
         assertEquals("Please use the date format yyyy-MM-dd.", exception.getMessage());
     }
 
@@ -85,8 +87,8 @@ class ParserTest {
     void parseKeyword_presentOrEmptyKeyword_returnsKeywordOrThrowsHelpfulException() throws AliceException {
         assertEquals("book", parser.parseKeyword("find book"));
 
-        AliceException exception = assertThrows(AliceException.class,
-                () -> parser.parseKeyword("find"));
+        AliceException exception = assertThrows(
+                AliceException.class, () -> parser.parseKeyword("find"));
         assertEquals("Please provide a keyword to find.", exception.getMessage());
     }
 }
