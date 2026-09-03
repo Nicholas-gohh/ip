@@ -7,7 +7,7 @@ public class ToDo extends Task {
     /**
      * Creates a todo task.
      *
-     * @param description the task description.
+     * @param description The task description.
      */
     public ToDo(String description) {
         super(description);
@@ -16,7 +16,7 @@ public class ToDo extends Task {
     /**
      * Returns this todo task in Alice's display format.
      *
-     * @return the formatted todo task.
+     * @return The formatted todo task.
      */
     @Override
     public String toString() {
