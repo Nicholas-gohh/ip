@@ -14,8 +14,8 @@ public class Deadline extends Task {
     /**
      * Creates a deadline task.
      *
-     * @param description the task description.
-     * @param by the deadline date.
+     * @param description The task description.
+     * @param by The deadline date.
      */
     public Deadline(String description, LocalDate by) {
         super(description);
@@ -30,7 +30,7 @@ public class Deadline extends Task {
     /**
      * Returns this deadline task in Alice's display format.
      *
-     * @return the formatted deadline task.
+     * @return The formatted deadline task.
      */
     @Override
     public String toString() {

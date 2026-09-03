@@ -37,9 +37,9 @@ public class Storage {
     /**
      * Converts a task into one line in readable storage.
      *
-     * @param task the task to format.
-     * @return the task's storage representation.
-     * @throws AliceException if the task is not valid.
+     * @param task The task to format.
+     * @return The task's storage representation.
+     * @throws AliceException If the task is not valid.
      */
     private String formatTask(Task task) throws AliceException {
         String status = task.isDone() ? "1" : "0";
@@ -64,9 +64,9 @@ public class Storage {
     /**
      * Converts one storage line into a task.
      *
-     * @param line the storage line to parse.
-     * @return the task represented by the storage line.
-     * @throws AliceException if the line does not follow the expected format.
+     * @param line The storage line to parse.
+     * @return The task represented by the storage line.
+     * @throws AliceException If the line does not follow the expected format.
      */
     private Task parseTask(String line) throws AliceException {
         // Preserve trailing empty fields while splitting on the storage delimiter.
@@ -124,7 +124,7 @@ public class Storage {
      * Loads all valid tasks from disk.
      * Creates an empty storage file if Alice is being run for the first time.
      *
-     * @return the successfully loaded tasks.
+     * @return The successfully loaded tasks.
      */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -147,8 +147,8 @@ public class Storage {
     /**
      * Replaces the storage file contents with the current task list.
      *
-     * @param tasks tasks that should be saved.
-     * @throws AliceException if the file cannot be written.
+     * @param tasks The tasks that should be saved.
+     * @throws AliceException If the file cannot be written.
      */
     public void save(List<Task> tasks) throws AliceException {
         ArrayList<String> lines = new ArrayList<>();

@@ -10,7 +10,7 @@ public class Task {
     /**
      * Creates a task with the given description.
      *
-     * @param description the task description.
+     * @param description The task description.
      */
     public Task(String description) {
         this.description = description;
@@ -49,7 +49,7 @@ public class Task {
     /**
      * Returns the task status and description for display.
      *
-     * @return a display representation of this task.
+     * @return A display representation of this task.
      */
     @Override
     public String toString() {

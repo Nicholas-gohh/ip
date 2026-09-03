@@ -7,7 +7,7 @@ public class AliceException extends Exception {
     /**
      * Creates an exception with a message suitable for displaying to the user.
      *
-     * @param message the explanation of the error.
+     * @param message The explanation of the error.
      */
     public AliceException(String message) {
         super(message);

@@ -1,0 +1,98 @@
+.root {
+    -fx-background-color: #10212a;
+}
+
+.header {
+    -fx-padding: 14 18 14 18;
+    -fx-background-color: #162d37;
+    -fx-border-color: transparent transparent #2f4b55 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-avatar {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-alignment: center;
+    -fx-background-color: #b9e79e;
+    -fx-background-radius: 22;
+    -fx-text-fill: #10212a;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.header-title {
+    -fx-text-fill: #edf4f4;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.header-subtitle {
+    -fx-text-fill: #a9b9bd;
+    -fx-font-size: 11px;
+}
+
+.scroll-pane {
+    -fx-background-color: #10212a;
+    -fx-background: #10212a;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #10212a;
+}
+
+.input-area {
+    -fx-padding: 10;
+    -fx-background-color: #162d37;
+}
+
+.text-field {
+    -fx-background-color: #223b44;
+    -fx-background-radius: 8;
+    -fx-text-fill: #edf4f4;
+    -fx-prompt-text-fill: #a9b9bd;
+}
+
+.button {
+    -fx-background-color: #365f51;
+    -fx-background-radius: 8;
+    -fx-text-fill: #edf4f4;
+}
+
+.button:hover {
+    -fx-background-color: #477664;
+}
+
+.message {
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: #edf4f4;
+}
+
+.bot-dialog .message {
+    -fx-background-color: #223b44;
+}
+
+.welcome-dialog .message {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 12px;
+}
+
+.user-dialog .message {
+    -fx-background-color: #365f51;
+}
+
+.avatar {
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-alignment: center;
+    -fx-background-color: #b9e79e;
+    -fx-background-radius: 18;
+    -fx-text-fill: #10212a;
+    -fx-font-weight: bold;
+}
+
+.user-dialog .avatar {
+    -fx-background-color: #365f51;
+    -fx-text-fill: #edf4f4;
+}

@@ -23,8 +23,8 @@ public class Parser {
     /**
      * Returns the first word of a user command without changing the original input.
      *
-     * @param userInput the complete command entered by the user.
-     * @return the command word, or an empty string when the input is empty.
+     * @param userInput The complete command entered by the user.
+     * @return The command word, or an empty string when the input is empty.
      */
     public String getCommandWord(String userInput) {
         int firstSpace = userInput.indexOf(' ');
@@ -34,9 +34,9 @@ public class Parser {
     /**
      * Creates a task from a todo, deadline, or event command.
      *
-     * @param userInput the complete task-creation command.
-     * @return the task described by the command.
-     * @throws AliceException if the task command is incomplete or invalid.
+     * @param userInput The complete task-creation command.
+     * @return The task described by the command.
+     * @throws AliceException If the task command is incomplete or invalid.
      */
     public Task parseTask(String userInput) throws AliceException {
         return switch (getCommandWord(userInput)) {
@@ -50,11 +50,11 @@ public class Parser {
     /**
      * Parses a task number and checks that it identifies an existing task.
      *
-     * @param userInput the complete command entered by the user.
-     * @param command the command keyword, such as {@code mark}.
-     * @param taskCount the number of tasks currently in the list.
-     * @return the valid one-based task number.
-     * @throws AliceException if no valid task number was supplied.
+     * @param userInput The complete command entered by the user.
+     * @param command The command keyword, such as {@code mark}.
+     * @param taskCount The number of tasks currently in the list.
+     * @return The valid one-based task number.
+     * @throws AliceException If no valid task number was supplied.
      */
     public int parseTaskNumber(String userInput, String command, int taskCount) throws AliceException {
         String number = userInput.substring(command.length()).trim();
@@ -76,9 +76,9 @@ public class Parser {
     /**
      * Parses the date supplied to a date command.
      *
-     * @param userInput the complete date command.
-     * @return the requested date.
-     * @throws AliceException if the date is not in yyyy-MM-dd format.
+     * @param userInput The complete date command.
+     * @return The requested date.
+     * @throws AliceException If the date is not in yyyy-MM-dd format.
      */
     public LocalDate parseDate(String userInput) throws AliceException {
         String dateText = userInput.substring("date".length()).trim();
@@ -92,9 +92,9 @@ public class Parser {
     /**
      * Parses the keyword supplied to a find command.
      *
-     * @param userInput the complete find command
-     * @return the keyword to search for
-     * @throws AliceException if the keyword is empty
+     * @param userInput The complete find command.
+     * @return The keyword to search for.
+     * @throws AliceException If the keyword is empty.
      */
     public String parseKeyword(String userInput) throws AliceException {
         String keyword = userInput.substring("find".length()).trim();
@@ -107,9 +107,9 @@ public class Parser {
     /**
      * Creates a todo task from its command.
      *
-     * @param userInput the complete todo command.
-     * @return the requested todo task.
-     * @throws AliceException if the description is empty.
+     * @param userInput The complete todo command.
+     * @return The requested todo task.
+     * @throws AliceException If the description is empty.
      */
     private Task parseToDo(String userInput) throws AliceException {
         String description = userInput.substring("todo".length()).trim();
@@ -122,9 +122,9 @@ public class Parser {
     /**
      * Creates a deadline task from its command.
      *
-     * @param userInput the complete deadline command.
-     * @return the requested deadline task.
-     * @throws AliceException if the description or date is invalid.
+     * @param userInput The complete deadline command.
+     * @return The requested deadline task.
+     * @throws AliceException If the description or date is invalid.
      */
     private Task parseDeadline(String userInput) throws AliceException {
         String[] sections = userInput.substring("deadline".length()).trim().split(" /by ", 2);
@@ -143,9 +143,9 @@ public class Parser {
     /**
      * Creates an event task from its command.
      *
-     * @param userInput the complete event command.
-     * @return the requested event task.
-     * @throws AliceException if the description or date and time values are invalid.
+     * @param userInput The complete event command.
+     * @return The requested event task.
+     * @throws AliceException If the description or date and time values are invalid.
      */
     private Task parseEvent(String userInput) throws AliceException {
         String[] fromSections = userInput.substring("event".length()).trim().split(" /from ", 2);

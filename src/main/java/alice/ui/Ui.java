@@ -13,6 +13,15 @@ import alice.task.TaskList;
  */
 public class Ui {
     private static final String SEPARATOR = "_______________________________________";
+    private static final String WELCOME_MESSAGE = SEPARATOR + "\n"
+            + "    _    _     ___ ____ _____ \n"
+            + "   / \\  | |   |_ _/ ___| ____|\n"
+            + "  / _ \\ | |    | | |   |  _|  \n"
+            + " / ___ \\| |___ | | |___| |___ \n"
+            + "/_/   \\_\\_____|___\\____|_____|\n"
+            + "Hello! I'm Alice.\n"
+            + "What can I do for you?\n"
+            + SEPARATOR;
     private static final DateTimeFormatter DATE_DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
     private final Scanner scanner;
@@ -28,22 +37,22 @@ public class Ui {
      * Displays Alice's welcome banner.
      */
     public void showWelcome() {
-        String banner = SEPARATOR + "\n"
-                + "    _    _     ___ ____ _____ \n"
-                + "   / \\  | |   |_ _/ ___| ____|\n"
-                + "  / _ \\ | |    | | |   |  _|  \n"
-                + " / ___ \\| |___ | | |___| |___ \n"
-                + "/_/   \\_\\_____|___\\____|_____|\n"
-                + "Hello! I'm Alice.\n"
-                + "What can I do for you?\n"
-                + SEPARATOR;
-        System.out.println(banner);
+        System.out.println(WELCOME_MESSAGE);
+    }
+
+    /**
+     * Returns the welcome banner used by Alice's user interfaces.
+     *
+     * @return The formatted welcome banner.
+     */
+    public static String getWelcomeMessage() {
+        return WELCOME_MESSAGE;
     }
 
     /**
      * Reads the next command entered by the user.
      *
-     * @return the command entered by the user.
+     * @return The command entered by the user.
      */
     public String readCommand() {
         return scanner.nextLine();
@@ -67,7 +76,7 @@ public class Ui {
     /**
      * Displays every task in the task list.
      *
-     * @param tasks the tasks to display.
+     * @param tasks The tasks to display.
      */
     public void showTaskList(TaskList tasks) {
         System.out.println("Here are the tasks in your list:");
@@ -80,8 +89,8 @@ public class Ui {
     /**
      * Displays the confirmation for a newly added task.
      *
-     * @param task the task that was added.
-     * @param taskCount the new number of tasks in the list.
+     * @param task The task that was added.
+     * @param taskCount The new number of tasks in the list.
      */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
@@ -93,7 +102,7 @@ public class Ui {
     /**
      * Displays the confirmation for a completed task.
      *
-     * @param task the task that was marked as done.
+     * @param task The task that was marked as done.
      */
     public void showTaskMarked(Task task) {
         System.out.println("Nice! I've marked this task as done:");
@@ -104,7 +113,7 @@ public class Ui {
     /**
      * Displays the confirmation for an incomplete task.
      *
-     * @param task the task that was marked as not done.
+     * @param task The task that was marked as not done.
      */
     public void showTaskUnmarked(Task task) {
         System.out.println("OK, I've marked this task as not done yet:");
@@ -115,8 +124,8 @@ public class Ui {
     /**
      * Displays the confirmation for a deleted task.
      *
-     * @param task the task that was removed.
-     * @param taskCount the number of tasks remaining in the list.
+     * @param task The task that was removed.
+     * @param taskCount The number of tasks remaining in the list.
      */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println("Noted. I've removed this task:");
@@ -128,7 +137,7 @@ public class Ui {
     /**
      * Displays an error message.
      *
-     * @param message the error message to display.
+     * @param message The error message to display.
      */
     public void showError(String message) {
         System.out.println(message);
@@ -136,10 +145,20 @@ public class Ui {
     }
 
     /**
+     * Displays a response produced by Alice.
+     *
+     * @param response The response to display.
+     */
+    public void showResponse(String response) {
+        System.out.println(response);
+        showSeparator();
+    }
+
+    /**
      * Displays the deadlines and events that occur on the given date.
      *
-     * @param tasks the tasks to search and display.
-     * @param date the date to match.
+     * @param tasks The tasks to search and display.
+     * @param date The date to match.
      */
     public void showTasksOnDate(TaskList tasks, LocalDate date) {
         List<Task> matchingTasks = tasks.getTasksOnDate(date);
@@ -158,8 +177,8 @@ public class Ui {
     /**
      * Displays the tasks whose descriptions contain a keyword.
      *
-     * @param tasks the tasks to search and display
-     * @param keyword the keyword to match
+     * @param tasks The tasks to search and display.
+     * @param keyword The keyword to match.
      */
     public void showMatchingTasks(TaskList tasks, String keyword) {
         List<Task> matchingTasks = tasks.getTasksWithKeyword(keyword);
