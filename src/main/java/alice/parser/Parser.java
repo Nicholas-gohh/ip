@@ -39,10 +39,10 @@ public class Parser {
      * @throws AliceException If the task command is incomplete or invalid.
      */
     public Task parseTask(String userInput) throws AliceException {
-        return switch (getCommandWord(userInput)) {
-            case "todo" -> parseToDo(userInput);
-            case "deadline" -> parseDeadline(userInput);
-            case "event" -> parseEvent(userInput);
+        return switch (Command.fromCommandWord(getCommandWord(userInput))) {
+            case TODO -> parseToDo(userInput);
+            case DEADLINE -> parseDeadline(userInput);
+            case EVENT -> parseEvent(userInput);
             default -> throw new AliceException("I don't understand that command.");
         };
     }
@@ -58,6 +58,7 @@ public class Parser {
      */
     public int parseTaskNumber(String userInput, String command, int taskCount) throws AliceException {
         String number = userInput.substring(command.length()).trim();
+
         if (number.isEmpty()) {
             throw new AliceException("Please provide a task number to " + command + ".");
         }
@@ -159,12 +160,12 @@ public class Parser {
         }
 
         try {
-            LocalDateTime from = LocalDateTime.parse(toSections[0], EVENT_INPUT_FORMAT);
-            LocalDateTime to = LocalDateTime.parse(toSections[1], EVENT_INPUT_FORMAT);
-            if (to.isBefore(from)) {
+            LocalDateTime fromDateTime = LocalDateTime.parse(toSections[0], EVENT_INPUT_FORMAT);
+            LocalDateTime toDateTime = LocalDateTime.parse(toSections[1], EVENT_INPUT_FORMAT);
+            if (toDateTime.isBefore(fromDateTime)) {
                 throw new AliceException("An event cannot end before it starts.");
             }
-            return new Event(fromSections[0], from, to);
+            return new Event(fromSections[0], fromDateTime, toDateTime);
         } catch (DateTimeParseException exception) {
             throw new AliceException("Please use the event date time format yyyy-MM-dd HHmm.");
         }

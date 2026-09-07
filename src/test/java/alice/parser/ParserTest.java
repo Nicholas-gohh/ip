@@ -22,6 +22,14 @@ import alice.task.ToDo;
 class ParserTest {
     private final Parser parser = new Parser();
 
+    /** Verifies that supported and unsupported command words map to their command values. */
+    @Test
+    void fromCommandWord_supportedAndUnsupportedWords_returnsExpectedCommand() {
+        assertEquals(Command.TODO, Command.fromCommandWord("todo"));
+        assertEquals(Command.DELETE, Command.fromCommandWord("delete"));
+        assertEquals(Command.UNKNOWN, Command.fromCommandWord("remind"));
+    }
+
     /** Verifies that valid task commands create task objects with the supplied details. */
     @Test
     void parseTask_validTaskCommands_createsCorrectTasks() throws AliceException {
