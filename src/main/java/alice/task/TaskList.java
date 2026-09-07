@@ -33,6 +33,7 @@ public class TaskList {
      * @param task The task to add.
      */
     public void add(Task task) {
+        assert task != null : "A task list must not contain null tasks.";
         tasks.add(task);
     }
 
@@ -43,6 +44,7 @@ public class TaskList {
      * @return The task at the specified index.
      */
     public Task get(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must identify an existing task.";
         return tasks.get(index);
     }
 
@@ -53,6 +55,7 @@ public class TaskList {
      * @return The removed task.
      */
     public Task remove(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must identify an existing task.";
         return tasks.remove(index);
     }
 
@@ -81,6 +84,7 @@ public class TaskList {
      * @return The tasks occurring on the specified date.
      */
     public List<Task> getTasksOnDate(LocalDate date) {
+        assert date != null : "A date search requires a date.";
         ArrayList<Task> matchingTasks = new ArrayList<>();
         for (Task task : tasks) {
             if (occursOn(task, date)) {
@@ -97,6 +101,7 @@ public class TaskList {
      * @return The matching tasks in their original order.
      */
     public List<Task> getTasksWithKeyword(String keyword) {
+        assert keyword != null && !keyword.isBlank() : "A keyword search requires a non-blank keyword.";
         ArrayList<Task> matchingTasks = new ArrayList<>();
         String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
         for (Task task : tasks) {
