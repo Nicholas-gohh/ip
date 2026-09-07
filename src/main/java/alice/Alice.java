@@ -58,7 +58,7 @@ public class Alice {
 
     /** Creates the response for the {@code mark} command. */
     private String getMarkResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "mark", tasks.size());
+        int taskNumber = parser.parseTaskNumber(userInput, Command.MARK, tasks.size());
         Task task = tasks.get(taskNumber - 1);
         if (task.isDone()) {
             throw new AliceException("This task is already marked as done.");
@@ -70,7 +70,7 @@ public class Alice {
 
     /** Creates the response for the {@code unmark} command. */
     private String getUnmarkResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "unmark", tasks.size());
+        int taskNumber = parser.parseTaskNumber(userInput, Command.UNMARK, tasks.size());
         Task task = tasks.get(taskNumber - 1);
         if (!task.isDone()) {
             throw new AliceException("This task is already marked as not done.");
@@ -91,7 +91,7 @@ public class Alice {
 
     /** Creates the response for the {@code delete} command. */
     private String getDeleteResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "delete", tasks.size());
+        int taskNumber = parser.parseTaskNumber(userInput, Command.DELETE, tasks.size());
         Task deletedTask = tasks.remove(taskNumber - 1);
         storage.save(tasks.asList());
         return "Noted. I've removed this task:\n  " + deletedTask
