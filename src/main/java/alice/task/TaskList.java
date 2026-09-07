@@ -81,13 +81,9 @@ public class TaskList {
      * @return The tasks occurring on the specified date.
      */
     public List<Task> getTasksOnDate(LocalDate date) {
-        ArrayList<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (occursOn(task, date)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> occursOn(task, date))
+                .toList();
     }
 
     /**
@@ -97,14 +93,10 @@ public class TaskList {
      * @return The matching tasks in their original order.
      */
     public List<Task> getTasksWithKeyword(String keyword) {
-        ArrayList<Task> matchingTasks = new ArrayList<>();
         String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword))
+                .toList();
     }
 
     /**
