@@ -148,7 +148,7 @@ public class Storage {
      *
      * @return The successfully loaded tasks.
      */
-    public ArrayList<Task> load() {
+    public List<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
         try {
             createFileIfMissing();
