@@ -26,6 +26,8 @@ public class Storage {
     private static final String TODO_TYPE = "T";
     private static final String DEADLINE_TYPE = "D";
     private static final String EVENT_TYPE = "E";
+    private static final String INCOMPLETE_STATUS = "0";
+    private static final String COMPLETED_STATUS = "1";
 
     /**
      * Creates the data folder and Alice.txt if they do not already exist.
@@ -45,7 +47,7 @@ public class Storage {
      * @throws AliceException If the task is not valid.
      */
     private String formatTask(Task task) throws AliceException {
-        String status = task.isDone() ? "1" : "0";
+        String status = task.isDone() ? COMPLETED_STATUS : INCOMPLETE_STATUS;
         switch (task) {
             case ToDo toDo -> {
                 return TODO_TYPE + " | " + status + " | " + task.getDescription();
@@ -90,7 +92,7 @@ public class Storage {
     /** Validates the fields common to every saved task type. */
     private void validateCommonFields(String[] parts) throws AliceException {
         if (parts.length < 3 || parts[2].isEmpty()
-                || (!parts[1].equals("0") && !parts[1].equals("1"))) {
+                || (!parts[1].equals(INCOMPLETE_STATUS) && !parts[1].equals(COMPLETED_STATUS))) {
             throw new AliceException("Invalid saved task.");
         }
     }
@@ -140,7 +142,7 @@ public class Storage {
 
     /** Restores a task's saved completion status. */
     private void restoreCompletionStatus(Task task, String status) {
-        if (status.equals("1")) {
+        if (status.equals(COMPLETED_STATUS)) {
             task.markAsDone();
         }
     }
