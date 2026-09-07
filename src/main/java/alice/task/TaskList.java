@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  * Stores and manages the tasks currently known by Alice.
  */
 public class TaskList {
-    private final List<Task> tasks;
+    private final ArrayList<Task> tasks;
 
     /**
      * Creates an empty task list.
