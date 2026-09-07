@@ -38,6 +38,17 @@ public class Parser {
     }
 
     /**
+     * Returns the portion of a command after its command word.
+     *
+     * @param userInput The complete command entered by the user.
+     * @param command The command to remove from the input.
+     * @return The trimmed command arguments.
+     */
+    private String getCommandArguments(String userInput, Command command) {
+        return userInput.substring(command.getCommandWord().length()).trim();
+    }
+
+    /**
      * Creates a task from a todo, deadline, or event command.
      *
      * @param userInput The complete task-creation command.
@@ -64,7 +75,7 @@ public class Parser {
      */
     public int parseTaskNumber(String userInput, Command command, int taskCount) throws AliceException {
         String commandWord = command.getCommandWord();
-        String number = userInput.substring(commandWord.length()).trim();
+        String number = getCommandArguments(userInput, command);
 
         if (number.isEmpty()) {
             throw new AliceException("Please provide a task number to " + commandWord + ".");
@@ -89,7 +100,7 @@ public class Parser {
      * @throws AliceException If the date is not in yyyy-MM-dd format.
      */
     public LocalDate parseDate(String userInput) throws AliceException {
-        String dateText = userInput.substring(Command.DATE.getCommandWord().length()).trim();
+        String dateText = getCommandArguments(userInput, Command.DATE);
         try {
             return LocalDate.parse(dateText, DEADLINE_INPUT_FORMAT);
         } catch (DateTimeParseException exception) {
@@ -105,7 +116,7 @@ public class Parser {
      * @throws AliceException If the keyword is empty.
      */
     public String parseKeyword(String userInput) throws AliceException {
-        String keyword = userInput.substring(Command.FIND.getCommandWord().length()).trim();
+        String keyword = getCommandArguments(userInput, Command.FIND);
         if (keyword.isEmpty()) {
             throw new AliceException("Please provide a keyword to find.");
         }
@@ -120,7 +131,7 @@ public class Parser {
      * @throws AliceException If the description is empty.
      */
     private Task parseToDo(String userInput) throws AliceException {
-        String description = userInput.substring(Command.TODO.getCommandWord().length()).trim();
+        String description = getCommandArguments(userInput, Command.TODO);
         if (description.isEmpty()) {
             throw new AliceException("The description of a todo cannot be empty.");
         }
@@ -135,7 +146,7 @@ public class Parser {
      * @throws AliceException If the description or date is invalid.
      */
     private Task parseDeadline(String userInput) throws AliceException {
-        String[] sections = userInput.substring(Command.DEADLINE.getCommandWord().length()).trim()
+        String[] sections = getCommandArguments(userInput, Command.DEADLINE)
                 .split(DEADLINE_BY_PREFIX, MAX_COMMAND_SECTIONS);
         if (sections.length != MAX_COMMAND_SECTIONS
                 || sections[0].isBlank() || sections[1].isBlank()) {
@@ -158,7 +169,7 @@ public class Parser {
      * @throws AliceException If the description or date and time values are invalid.
      */
     private Task parseEvent(String userInput) throws AliceException {
-        String[] fromSections = userInput.substring(Command.EVENT.getCommandWord().length()).trim()
+        String[] fromSections = getCommandArguments(userInput, Command.EVENT)
                 .split(EVENT_FROM_PREFIX, MAX_COMMAND_SECTIONS);
         if (fromSections.length != MAX_COMMAND_SECTIONS || fromSections[0].isBlank()) {
             throw new AliceException(EVENT_DETAILS_ERROR);
