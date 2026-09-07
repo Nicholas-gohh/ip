@@ -43,8 +43,7 @@ public class Alice {
             return switch (command) {
                 case BYE -> "Bye. Hope to see you again soon!";
                 case LIST -> getTaskListResponse();
-                case MARK -> getMarkResponse(userInput);
-                case UNMARK -> getUnmarkResponse(userInput);
+                case MARK, UNMARK -> getTaskStatusResponse(userInput, command);
                 case TODO, DEADLINE, EVENT -> getAddTaskResponse(userInput);
                 case DATE -> getDateResponse(parser.parseDate(userInput));
                 case FIND -> getFindResponse(parser.parseKeyword(userInput));
@@ -56,26 +55,26 @@ public class Alice {
         }
     }
 
-    /** Creates the response for the {@code mark} command. */
-    private String getMarkResponse(String userInput) throws AliceException {
-        Task task = tasks.get(getTaskIndex(userInput, Command.MARK));
-        if (task.isDone()) {
-            throw new AliceException("This task is already marked as done.");
+    /** Creates the response for a {@code mark} or {@code unmark} command. */
+    private String getTaskStatusResponse(String userInput, Command command) throws AliceException {
+        Task task = tasks.get(getTaskIndex(userInput, command));
+        boolean isMarking = command == Command.MARK;
+        if (task.isDone() == isMarking) {
+            throw new AliceException(isMarking
+                    ? "This task is already marked as done."
+                    : "This task is already marked as not done.");
         }
-        task.markAsDone();
-        storage.save(tasks.asList());
-        return "Nice! I've marked this task as done:\n  " + task;
-    }
 
-    /** Creates the response for the {@code unmark} command. */
-    private String getUnmarkResponse(String userInput) throws AliceException {
-        Task task = tasks.get(getTaskIndex(userInput, Command.UNMARK));
-        if (!task.isDone()) {
-            throw new AliceException("This task is already marked as not done.");
+        if (isMarking) {
+            task.markAsDone();
+        } else {
+            task.unmarkAsDone();
         }
-        task.unmarkAsDone();
         storage.save(tasks.asList());
-        return "OK, I've marked this task as not done yet:\n  " + task;
+
+        return isMarking
+                ? "Nice! I've marked this task as done:\n  " + task
+                : "OK, I've marked this task as not done yet:\n  " + task;
     }
 
     /** Creates the response for a task-creation command. */
