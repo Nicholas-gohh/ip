@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import alice.exception.AliceException;
+import alice.parser.Command;
 import alice.parser.Parser;
 import alice.storage.Storage;
 import alice.task.Task;
@@ -37,52 +38,64 @@ public class Alice {
      * @return Alice's response to the command.
      */
     public String getResponse(String userInput) {
-        String command = parser.getCommandWord(userInput);
+        Command command = Command.fromCommandWord(parser.getCommandWord(userInput));
         try {
-            if (userInput.equals("bye")) {
-                return "Bye. Hope to see you again soon!";
-            } else if (userInput.equals("list")) {
-                return getTaskListResponse();
-            } else if (command.equals("mark")) {
-                int taskNumber = parser.parseTaskNumber(userInput, "mark", tasks.size());
-                Task task = tasks.get(taskNumber - 1);
-                if (task.isDone()) {
-                    throw new AliceException("This task is already marked as done.");
-                }
-                task.markAsDone();
-                storage.save(tasks.asList());
-                return "Nice! I've marked this task as done:\n  " + task;
-            } else if (command.equals("unmark")) {
-                int taskNumber = parser.parseTaskNumber(userInput, "unmark", tasks.size());
-                Task task = tasks.get(taskNumber - 1);
-                if (!task.isDone()) {
-                    throw new AliceException("This task is already marked as not done.");
-                }
-                task.unmarkAsDone();
-                storage.save(tasks.asList());
-                return "OK, I've marked this task as not done yet:\n  " + task;
-            } else if (command.equals("todo") || command.equals("deadline") || command.equals("event")) {
-                Task task = parser.parseTask(userInput);
-                tasks.add(task);
-                storage.save(tasks.asList());
-                return "Got it. I've added this task:\n  " + task
-                        + "\nNow you have " + tasks.size() + " tasks in the list.";
-            } else if (command.equals("date")) {
-                return getDateResponse(parser.parseDate(userInput));
-            } else if (command.equals("find")) {
-                return getFindResponse(parser.parseKeyword(userInput));
-            } else if (command.equals("delete")) {
-                int taskNumber = parser.parseTaskNumber(userInput, "delete", tasks.size());
-                Task deletedTask = tasks.remove(taskNumber - 1);
-                storage.save(tasks.asList());
-                return "Noted. I've removed this task:\n  " + deletedTask
-                        + "\nNow you have " + tasks.size() + " tasks in the list.";
-            } else {
-                throw new AliceException("I don't understand that command.");
-            }
+            return switch (command) {
+                case BYE -> "Bye. Hope to see you again soon!";
+                case LIST -> getTaskListResponse();
+                case MARK -> getMarkResponse(userInput);
+                case UNMARK -> getUnmarkResponse(userInput);
+                case TODO, DEADLINE, EVENT -> getAddTaskResponse(userInput);
+                case DATE -> getDateResponse(parser.parseDate(userInput));
+                case FIND -> getFindResponse(parser.parseKeyword(userInput));
+                case DELETE -> getDeleteResponse(userInput);
+                case UNKNOWN -> throw new AliceException("I don't understand that command.");
+            };
         } catch (AliceException e) {
             return e.getMessage();
         }
+    }
+
+    /** Creates the response for the {@code mark} command. */
+    private String getMarkResponse(String userInput) throws AliceException {
+        int taskNumber = parser.parseTaskNumber(userInput, "mark", tasks.size());
+        Task task = tasks.get(taskNumber - 1);
+        if (task.isDone()) {
+            throw new AliceException("This task is already marked as done.");
+        }
+        task.markAsDone();
+        storage.save(tasks.asList());
+        return "Nice! I've marked this task as done:\n  " + task;
+    }
+
+    /** Creates the response for the {@code unmark} command. */
+    private String getUnmarkResponse(String userInput) throws AliceException {
+        int taskNumber = parser.parseTaskNumber(userInput, "unmark", tasks.size());
+        Task task = tasks.get(taskNumber - 1);
+        if (!task.isDone()) {
+            throw new AliceException("This task is already marked as not done.");
+        }
+        task.unmarkAsDone();
+        storage.save(tasks.asList());
+        return "OK, I've marked this task as not done yet:\n  " + task;
+    }
+
+    /** Creates the response for a task-creation command. */
+    private String getAddTaskResponse(String userInput) throws AliceException {
+        Task task = parser.parseTask(userInput);
+        tasks.add(task);
+        storage.save(tasks.asList());
+        return "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
+    }
+
+    /** Creates the response for the {@code delete} command. */
+    private String getDeleteResponse(String userInput) throws AliceException {
+        int taskNumber = parser.parseTaskNumber(userInput, "delete", tasks.size());
+        Task deletedTask = tasks.remove(taskNumber - 1);
+        storage.save(tasks.asList());
+        return "Noted. I've removed this task:\n  " + deletedTask
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
     }
 
     /**
