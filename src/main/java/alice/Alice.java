@@ -122,12 +122,8 @@ public class Alice {
         if (matchingTasks.isEmpty()) {
             return "No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".";
         }
-        StringBuilder response = new StringBuilder("Here are the tasks occurring on ")
-                .append(date.format(DATE_DISPLAY_FORMAT)).append(':');
-        for (Task task : matchingTasks) {
-            response.append("\n  ").append(tasks.indexOf(task) + 1).append('.').append(task);
-        }
-        return response.toString();
+        String heading = "Here are the tasks occurring on " + date.format(DATE_DISPLAY_FORMAT) + ":";
+        return formatTaskListResponse(heading, matchingTasks);
     }
 
     /**
@@ -141,8 +137,19 @@ public class Alice {
         if (matchingTasks.isEmpty()) {
             return "No matching tasks found.";
         }
-        StringBuilder response = new StringBuilder("Here are the matching tasks in your list:");
-        for (Task task : matchingTasks) {
+        return formatTaskListResponse("Here are the matching tasks in your list:", matchingTasks);
+    }
+
+    /**
+     * Formats tasks with their positions in the complete task list.
+     *
+     * @param heading The heading to show before the tasks.
+     * @param tasksToDisplay The tasks to format.
+     * @return The formatted task list response.
+     */
+    private String formatTaskListResponse(String heading, List<Task> tasksToDisplay) {
+        StringBuilder response = new StringBuilder(heading);
+        for (Task task : tasksToDisplay) {
             response.append("\n  ").append(tasks.indexOf(task) + 1).append('.').append(task);
         }
         return response.toString();
