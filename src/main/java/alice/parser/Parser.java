@@ -19,6 +19,12 @@ public class Parser {
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter EVENT_INPUT_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    private static final int MAX_COMMAND_SECTIONS = 2;
+    private static final String DEADLINE_BY_PREFIX = " /by ";
+    private static final String EVENT_FROM_PREFIX = " /from ";
+    private static final String EVENT_TO_PREFIX = " /to ";
+    private static final String EVENT_DETAILS_ERROR =
+            "An event needs a description, a /from date time, and a /to date time.";
 
     /**
      * Returns the first word of a user command without changing the original input.
@@ -130,8 +136,9 @@ public class Parser {
      */
     private Task parseDeadline(String userInput) throws AliceException {
         String[] sections = userInput.substring(Command.DEADLINE.getCommandWord().length()).trim()
-                .split(" /by ", 2);
-        if (sections.length != 2 || sections[0].isBlank() || sections[1].isBlank()) {
+                .split(DEADLINE_BY_PREFIX, MAX_COMMAND_SECTIONS);
+        if (sections.length != MAX_COMMAND_SECTIONS
+                || sections[0].isBlank() || sections[1].isBlank()) {
             throw new AliceException("A deadline needs a description and a /by date.");
         }
 
@@ -152,14 +159,15 @@ public class Parser {
      */
     private Task parseEvent(String userInput) throws AliceException {
         String[] fromSections = userInput.substring(Command.EVENT.getCommandWord().length()).trim()
-                .split(" /from ", 2);
-        if (fromSections.length != 2 || fromSections[0].isBlank()) {
-            throw new AliceException("An event needs a description, a /from date time, and a /to date time.");
+                .split(EVENT_FROM_PREFIX, MAX_COMMAND_SECTIONS);
+        if (fromSections.length != MAX_COMMAND_SECTIONS || fromSections[0].isBlank()) {
+            throw new AliceException(EVENT_DETAILS_ERROR);
         }
 
-        String[] toSections = fromSections[1].split(" /to ", 2);
-        if (toSections.length != 2 || toSections[0].isBlank() || toSections[1].isBlank()) {
-            throw new AliceException("An event needs a description, a /from date time, and a /to date time.");
+        String[] toSections = fromSections[1].split(EVENT_TO_PREFIX, MAX_COMMAND_SECTIONS);
+        if (toSections.length != MAX_COMMAND_SECTIONS
+                || toSections[0].isBlank() || toSections[1].isBlank()) {
+            throw new AliceException(EVENT_DETAILS_ERROR);
         }
 
         try {
