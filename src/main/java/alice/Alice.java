@@ -176,8 +176,8 @@ public class Alice {
         while (true) {
             String userInput = ui.readCommand();
             ui.showSeparator();
-            if (userInput.equals("bye")) {
-                ui.showGoodbye();
+            if (userInput.equals(Command.BYE.getCommandWord())) {
+                ui.showResponse(alice.getResponse(userInput));
                 break;
             }
             ui.showResponse(alice.getResponse(userInput));

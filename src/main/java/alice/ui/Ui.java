@@ -58,14 +58,6 @@ public class Ui {
     }
 
     /**
-     * Displays Alice's goodbye message.
-     */
-    public void showGoodbye() {
-        System.out.println("Bye. Hope to see you again soon!");
-        showSeparator();
-    }
-
-    /**
      * Displays a response produced by Alice.
      *
      * @param response The response to display.

@@ -1,6 +1,7 @@
 package alice.ui;
 
 import alice.Alice;
+import alice.parser.Command;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
@@ -55,7 +56,7 @@ public class MainWindow {
         dialogContainer.getChildren().add(DialogBox.getUserDialog(command));
         dialogContainer.getChildren().add(DialogBox.getBotDialog(alice.getResponse(command)));
         userInput.clear();
-        if (command.equals("bye")) {
+        if (command.equals(Command.BYE.getCommandWord())) {
             Platform.exit();
         }
     }
