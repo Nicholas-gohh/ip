@@ -43,8 +43,7 @@ public class Alice {
             return switch (command) {
                 case BYE -> "Bye. Hope to see you again soon!";
                 case LIST -> getTaskListResponse();
-                case MARK -> getMarkResponse(userInput);
-                case UNMARK -> getUnmarkResponse(userInput);
+                case MARK, UNMARK -> getTaskStatusResponse(userInput, command);
                 case TODO, DEADLINE, EVENT -> getAddTaskResponse(userInput);
                 case DATE -> getDateResponse(parser.parseDate(userInput));
                 case FIND -> getFindResponse(parser.parseKeyword(userInput));
@@ -56,28 +55,26 @@ public class Alice {
         }
     }
 
-    /** Creates the response for the {@code mark} command. */
-    private String getMarkResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "mark", tasks.size());
-        Task task = tasks.get(taskNumber - 1);
-        if (task.isDone()) {
-            throw new AliceException("This task is already marked as done.");
+    /** Creates the response for a {@code mark} or {@code unmark} command. */
+    private String getTaskStatusResponse(String userInput, Command command) throws AliceException {
+        Task task = tasks.get(getTaskIndex(userInput, command));
+        boolean isMarking = command == Command.MARK;
+        if (task.isDone() == isMarking) {
+            throw new AliceException(isMarking
+                    ? "This task is already marked as done."
+                    : "This task is already marked as not done.");
         }
-        task.markAsDone();
-        storage.save(tasks.asList());
-        return "Nice! I've marked this task as done:\n  " + task;
-    }
 
-    /** Creates the response for the {@code unmark} command. */
-    private String getUnmarkResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "unmark", tasks.size());
-        Task task = tasks.get(taskNumber - 1);
-        if (!task.isDone()) {
-            throw new AliceException("This task is already marked as not done.");
+        if (isMarking) {
+            task.markAsDone();
+        } else {
+            task.unmarkAsDone();
         }
-        task.unmarkAsDone();
         storage.save(tasks.asList());
-        return "OK, I've marked this task as not done yet:\n  " + task;
+
+        return isMarking
+                ? "Nice! I've marked this task as done:\n  " + task
+                : "OK, I've marked this task as not done yet:\n  " + task;
     }
 
     /** Creates the response for a task-creation command. */
@@ -91,11 +88,22 @@ public class Alice {
 
     /** Creates the response for the {@code delete} command. */
     private String getDeleteResponse(String userInput) throws AliceException {
-        int taskNumber = parser.parseTaskNumber(userInput, "delete", tasks.size());
-        Task deletedTask = tasks.remove(taskNumber - 1);
+        Task deletedTask = tasks.remove(getTaskIndex(userInput, Command.DELETE));
         storage.save(tasks.asList());
         return "Noted. I've removed this task:\n  " + deletedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
+    }
+
+    /**
+     * Parses a command's task number and converts it to a zero-based task index.
+     *
+     * @param userInput The complete command entered by the user.
+     * @param command The command containing the task number.
+     * @return The zero-based index of the selected task.
+     * @throws AliceException If the command does not identify an existing task.
+     */
+    private int getTaskIndex(String userInput, Command command) throws AliceException {
+        return parser.parseTaskNumber(userInput, command, tasks.size()) - 1;
     }
 
     /**
@@ -122,12 +130,8 @@ public class Alice {
         if (matchingTasks.isEmpty()) {
             return "No tasks occur on " + date.format(DATE_DISPLAY_FORMAT) + ".";
         }
-        StringBuilder response = new StringBuilder("Here are the tasks occurring on ")
-                .append(date.format(DATE_DISPLAY_FORMAT)).append(':');
-        for (Task task : matchingTasks) {
-            response.append("\n  ").append(tasks.indexOf(task) + 1).append('.').append(task);
-        }
-        return response.toString();
+        String heading = "Here are the tasks occurring on " + date.format(DATE_DISPLAY_FORMAT) + ":";
+        return formatTaskListResponse(heading, matchingTasks);
     }
 
     /**
@@ -141,8 +145,19 @@ public class Alice {
         if (matchingTasks.isEmpty()) {
             return "No matching tasks found.";
         }
-        StringBuilder response = new StringBuilder("Here are the matching tasks in your list:");
-        for (Task task : matchingTasks) {
+        return formatTaskListResponse("Here are the matching tasks in your list:", matchingTasks);
+    }
+
+    /**
+     * Formats tasks with their positions in the complete task list.
+     *
+     * @param heading The heading to show before the tasks.
+     * @param tasksToDisplay The tasks to format.
+     * @return The formatted task list response.
+     */
+    private String formatTaskListResponse(String heading, List<Task> tasksToDisplay) {
+        StringBuilder response = new StringBuilder(heading);
+        for (Task task : tasksToDisplay) {
             response.append("\n  ").append(tasks.indexOf(task) + 1).append('.').append(task);
         }
         return response.toString();
@@ -160,8 +175,8 @@ public class Alice {
         while (true) {
             String userInput = ui.readCommand();
             ui.showSeparator();
-            if (userInput.equals("bye")) {
-                ui.showGoodbye();
+            if (userInput.equals(Command.BYE.getCommandWord())) {
+                ui.showResponse(alice.getResponse(userInput));
                 break;
             }
             ui.showResponse(alice.getResponse(userInput));

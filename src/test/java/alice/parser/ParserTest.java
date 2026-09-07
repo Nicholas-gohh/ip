@@ -63,18 +63,18 @@ class ParserTest {
     /** Verifies that a valid one-based task number is returned unchanged. */
     @Test
     void parseTaskNumber_validNumber_returnsOneBasedTaskNumber() throws AliceException {
-        assertEquals(2, parser.parseTaskNumber("mark 2", "mark", 3));
+        assertEquals(2, parser.parseTaskNumber("mark 2", Command.MARK, 3));
     }
 
     /** Verifies that missing, non-numeric, and out-of-range task numbers are rejected. */
     @Test
     void parseTaskNumber_invalidNumbers_throwHelpfulException() {
         AliceException missingNumber = assertThrows(
-                AliceException.class, () -> parser.parseTaskNumber("delete", "delete", 2));
+                AliceException.class, () -> parser.parseTaskNumber("delete", Command.DELETE, 2));
         AliceException nonNumericNumber = assertThrows(
-                AliceException.class, () -> parser.parseTaskNumber("mark two", "mark", 2));
+                AliceException.class, () -> parser.parseTaskNumber("mark two", Command.MARK, 2));
         AliceException outOfRangeNumber = assertThrows(
-                AliceException.class, () -> parser.parseTaskNumber("unmark 3", "unmark", 2));
+                AliceException.class, () -> parser.parseTaskNumber("unmark 3", Command.UNMARK, 2));
 
         assertEquals("Please provide a task number to delete.", missingNumber.getMessage());
         assertEquals("The task number must be a positive whole number.", nonNumericNumber.getMessage());

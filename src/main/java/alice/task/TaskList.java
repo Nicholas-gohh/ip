@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * Stores and manages the tasks currently known by Alice.
@@ -85,9 +86,7 @@ public class TaskList {
      */
     public List<Task> getTasksOnDate(LocalDate date) {
         assert date != null : "A date search requires a date.";
-        return tasks.stream()
-                .filter(task -> occursOn(task, date))
-                .toList();
+        return getMatchingTasks(task -> occursOn(task, date));
     }
 
     /**
@@ -99,8 +98,14 @@ public class TaskList {
     public List<Task> getTasksWithKeyword(String keyword) {
         assert keyword != null && !keyword.isBlank() : "A keyword search requires a non-blank keyword.";
         String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
+        return getMatchingTasks(task -> task.getDescription()
+                .toLowerCase(Locale.ROOT).contains(lowercaseKeyword));
+    }
+
+    /** Returns the tasks that satisfy the supplied condition, in their original order. */
+    private List<Task> getMatchingTasks(Predicate<Task> matches) {
         return tasks.stream()
-                .filter(task -> task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword))
+                .filter(matches)
                 .toList();
     }
 

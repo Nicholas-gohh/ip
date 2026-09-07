@@ -23,6 +23,15 @@ public enum Command {
     }
 
     /**
+     * Returns the word that invokes this command.
+     *
+     * @return The command word.
+     */
+    public String getCommandWord() {
+        return commandWord;
+    }
+
+    /**
      * Returns the command represented by a command word.
      *
      * @param commandWord The first word of a user's input.

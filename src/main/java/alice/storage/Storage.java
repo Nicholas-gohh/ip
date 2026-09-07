@@ -23,6 +23,11 @@ import alice.task.ToDo;
  */
 public class Storage {
     private static final Path FILE_PATH = Path.of("data", "Alice.txt");
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String INCOMPLETE_STATUS = "0";
+    private static final String COMPLETED_STATUS = "1";
 
     /**
      * Creates the data folder and Alice.txt if they do not already exist.
@@ -42,17 +47,17 @@ public class Storage {
      * @throws AliceException If the task is not valid.
      */
     private String formatTask(Task task) throws AliceException {
-        String status = task.isDone() ? "1" : "0";
+        String status = task.isDone() ? COMPLETED_STATUS : INCOMPLETE_STATUS;
         switch (task) {
             case ToDo toDo -> {
-                return "T | " + status + " | " + task.getDescription();
+                return TODO_TYPE + " | " + status + " | " + task.getDescription();
             }
             case Deadline deadline -> {
-                return "D | " + status + " | " + task.getDescription()
+                return DEADLINE_TYPE + " | " + status + " | " + task.getDescription()
                         + " | " + deadline.getBy();
             }
             case Event event -> {
-                return "E | " + status + " | " + task.getDescription()
+                return EVENT_TYPE + " | " + status + " | " + task.getDescription()
                         + " | " + event.getFrom() + " | " + event.getTo();
             }
             default -> {
@@ -69,55 +74,77 @@ public class Storage {
      * @throws AliceException If the line does not follow the expected format.
      */
     private Task parseTask(String line) throws AliceException {
-        // Preserve trailing empty fields while splitting on the storage delimiter.
         String[] parts = line.split("\\|", -1);
+        trimFields(parts);
+        validateCommonFields(parts);
+        Task task = createTask(parts);
+        restoreCompletionStatus(task, parts[1]);
+        return task;
+    }
 
+    /** Removes surrounding whitespace from each storage field. */
+    private void trimFields(String[] parts) {
         for (int index = 0; index < parts.length; index++) {
             parts[index] = parts[index].trim();
         }
+    }
 
-        // Validate the task status and description.
+    /** Validates the fields common to every saved task type. */
+    private void validateCommonFields(String[] parts) throws AliceException {
         if (parts.length < 3 || parts[2].isEmpty()
-                || (!parts[1].equals("0") && !parts[1].equals("1"))) {
+                || (!parts[1].equals(INCOMPLETE_STATUS) && !parts[1].equals(COMPLETED_STATUS))) {
             throw new AliceException("Invalid saved task.");
         }
+    }
 
-        // Create the task subtype identified by the first field.
-        Task task = switch (parts[0]) {
-            case "T" -> {
-                if (parts.length != 3) {
-                    throw new AliceException("Invalid todo task.");
-                }
-                yield new ToDo(parts[2]);
-            }
-            case "D" -> {
-                if (parts.length != 4 || parts[3].isEmpty()) {
-                    throw new AliceException("Invalid deadline task.");
-                }
-                try {
-                    yield new Deadline(parts[2], LocalDate.parse(parts[3]));
-                } catch (DateTimeParseException exception) {
-                    throw new AliceException("Invalid deadline date.");
-                }
-            }
-            case "E" -> {
-                if (parts.length != 5 || parts[3].isEmpty() || parts[4].isEmpty()) {
-                    throw new AliceException("Invalid event task.");
-                }
-                try {
-                    yield new Event(parts[2], LocalDateTime.parse(parts[3]),
-                            LocalDateTime.parse(parts[4]));
-                } catch (DateTimeParseException exception) {
-                    throw new AliceException("Invalid event date time.");
-                }
-            }
+    /** Creates the task subtype identified by the storage type field. */
+    private Task createTask(String[] parts) throws AliceException {
+        return switch (parts[0]) {
+            case TODO_TYPE -> createToDo(parts);
+            case DEADLINE_TYPE -> createDeadline(parts);
+            case EVENT_TYPE -> createEvent(parts);
             default -> throw new AliceException("Unknown task type.");
         };
+    }
 
-        if (parts[1].equals("1")) {
+    /** Creates a todo task from its validated storage fields. */
+    private Task createToDo(String[] parts) throws AliceException {
+        if (parts.length != 3) {
+            throw new AliceException("Invalid todo task.");
+        }
+        return new ToDo(parts[2]);
+    }
+
+    /** Creates a deadline task from its validated storage fields. */
+    private Task createDeadline(String[] parts) throws AliceException {
+        if (parts.length != 4 || parts[3].isEmpty()) {
+            throw new AliceException("Invalid deadline task.");
+        }
+        try {
+            return new Deadline(parts[2], LocalDate.parse(parts[3]));
+        } catch (DateTimeParseException exception) {
+            throw new AliceException("Invalid deadline date.");
+        }
+    }
+
+    /** Creates an event task from its validated storage fields. */
+    private Task createEvent(String[] parts) throws AliceException {
+        if (parts.length != 5 || parts[3].isEmpty() || parts[4].isEmpty()) {
+            throw new AliceException("Invalid event task.");
+        }
+        try {
+            return new Event(parts[2], LocalDateTime.parse(parts[3]),
+                    LocalDateTime.parse(parts[4]));
+        } catch (DateTimeParseException exception) {
+            throw new AliceException("Invalid event date time.");
+        }
+    }
+
+    /** Restores a task's saved completion status. */
+    private void restoreCompletionStatus(Task task, String status) {
+        if (status.equals(COMPLETED_STATUS)) {
             task.markAsDone();
         }
-        return task;
     }
 
     /**
@@ -126,7 +153,7 @@ public class Storage {
      *
      * @return The successfully loaded tasks.
      */
-    public ArrayList<Task> load() {
+    public List<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
         try {
             createFileIfMissing();
