@@ -1,9 +1,9 @@
 package alice.task;
 
 /**
- * Represents a task with a description and completion status.
+ * Represents the shared state of every concrete task type.
  */
-public class Task {
+public abstract class Task {
     private final String description;
     private boolean isDone;
 
