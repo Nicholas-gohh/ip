@@ -85,13 +85,9 @@ public class TaskList {
      */
     public List<Task> getTasksOnDate(LocalDate date) {
         assert date != null : "A date search requires a date.";
-        ArrayList<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (occursOn(task, date)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> occursOn(task, date))
+                .toList();
     }
 
     /**
@@ -102,14 +98,10 @@ public class TaskList {
      */
     public List<Task> getTasksWithKeyword(String keyword) {
         assert keyword != null && !keyword.isBlank() : "A keyword search requires a non-blank keyword.";
-        ArrayList<Task> matchingTasks = new ArrayList<>();
         String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword))
+                .toList();
     }
 
     /**
