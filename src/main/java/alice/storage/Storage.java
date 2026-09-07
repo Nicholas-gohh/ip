@@ -23,6 +23,9 @@ import alice.task.ToDo;
  */
 public class Storage {
     private static final Path FILE_PATH = Path.of("data", "Alice.txt");
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
 
     /**
      * Creates the data folder and Alice.txt if they do not already exist.
@@ -45,14 +48,14 @@ public class Storage {
         String status = task.isDone() ? "1" : "0";
         switch (task) {
             case ToDo toDo -> {
-                return "T | " + status + " | " + task.getDescription();
+                return TODO_TYPE + " | " + status + " | " + task.getDescription();
             }
             case Deadline deadline -> {
-                return "D | " + status + " | " + task.getDescription()
+                return DEADLINE_TYPE + " | " + status + " | " + task.getDescription()
                         + " | " + deadline.getBy();
             }
             case Event event -> {
-                return "E | " + status + " | " + task.getDescription()
+                return EVENT_TYPE + " | " + status + " | " + task.getDescription()
                         + " | " + event.getFrom() + " | " + event.getTo();
             }
             default -> {
@@ -95,9 +98,9 @@ public class Storage {
     /** Creates the task subtype identified by the storage type field. */
     private Task createTask(String[] parts) throws AliceException {
         return switch (parts[0]) {
-            case "T" -> createToDo(parts);
-            case "D" -> createDeadline(parts);
-            case "E" -> createEvent(parts);
+            case TODO_TYPE -> createToDo(parts);
+            case DEADLINE_TYPE -> createDeadline(parts);
+            case EVENT_TYPE -> createEvent(parts);
             default -> throw new AliceException("Unknown task type.");
         };
     }
