@@ -99,13 +99,9 @@ public class TaskList {
 
     /** Returns the tasks that satisfy the supplied condition, in their original order. */
     private List<Task> getMatchingTasks(Predicate<Task> matches) {
-        ArrayList<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (matches.test(task)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(matches)
+                .toList();
     }
 
     /**
