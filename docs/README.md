@@ -1,30 +1,32 @@
 # Alice User Guide
 
-// Update the title above to match the actual product name
+## Recurring deadlines and events
 
-// Product screenshot goes here
+Deadlines and events can repeat daily, weekly, monthly, or yearly. Recurrence intervals are case-insensitive.
+Todos cannot recur because they have no scheduled date.
 
-// Product intro goes here
+Create a recurring task by adding `/r INTERVAL`:
 
-## Adding deadlines
-
-// Describe the action and its outcome.
-
-// Give examples of usage
-
-Example: `keyword (optional arguments)`
-
-// A description of the expected outcome goes here
-
-```
-expected output
+```text
+deadline Pay rent /by 2026-10-01 /r MONTHLY
+event Team meeting /from 2026-10-08 1400 /to 2026-10-08 1500 /r weekly
 ```
 
-## Feature ABC
+You can also configure an incomplete deadline or event already in the list:
 
-// Feature details
+```text
+repeat 3 daily
+repeat 3 none
+```
 
+`repeat TASK_NUMBER none` stops future recurrence. Completed tasks and todos cannot be changed with `repeat`.
 
-## Feature XYZ
+When you mark a recurring task complete, Alice keeps that completed occurrence and appends the first future
+occurrence of the same task. The new occurrence is calculated from the current date and time, so missed intervals
+are skipped. For events, both the start and end date-times move by the interval, preserving the event duration.
 
-// Feature details
+Recurring tasks are shown with a suffix such as `(repeats: monthly)`. Completed recurring tasks are immutable:
+they cannot be unmarked or reconfigured, but `delete TASK_NUMBER` can remove any individual occurrence.
+
+Saved recurring deadlines and events include an optional recurrence field. Existing saved tasks without that field
+remain valid and load as non-recurring tasks.

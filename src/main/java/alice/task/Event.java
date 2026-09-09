@@ -39,6 +39,30 @@ public class Event extends Task {
         return toDateTime;
     }
 
+    /** Creates the first event occurrence scheduled after the supplied date and time. */
+    @Override
+    public Task createNextOccurrence(LocalDateTime currentDateTime) {
+        LocalDateTime nextFrom = advanceDateTime(fromDateTime);
+        LocalDateTime nextTo = advanceDateTime(toDateTime);
+        while (!nextFrom.isAfter(currentDateTime)) {
+            nextFrom = advanceDateTime(nextFrom);
+            nextTo = advanceDateTime(nextTo);
+        }
+        Event nextEvent = new Event(getDescription(), nextFrom, nextTo);
+        nextEvent.setRecurrence(getRecurrence());
+        return nextEvent;
+    }
+
+    /** Advances the supplied date and time by this task's recurrence interval. */
+    private LocalDateTime advanceDateTime(LocalDateTime dateTime) {
+        return switch (getRecurrence()) {
+            case DAILY -> dateTime.plusDays(1);
+            case WEEKLY -> dateTime.plusWeeks(1);
+            case MONTHLY -> dateTime.plusMonths(1);
+            case YEARLY -> dateTime.plusYears(1);
+        };
+    }
+
     /**
      * Returns this event task in Alice's display format.
      *
@@ -46,7 +70,8 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
+        String recurrenceText = isRecurring() ? " (repeats: " + getRecurrence().getDisplayName() + ")" : "";
         return "[E]" + super.toString() + " (from: " + fromDateTime.format(DISPLAY_FORMAT)
-                + " to: " + toDateTime.format(DISPLAY_FORMAT) + ")";
+                + " to: " + toDateTime.format(DISPLAY_FORMAT) + ")" + recurrenceText;
     }
 }

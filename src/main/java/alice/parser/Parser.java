@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import alice.exception.AliceException;
 import alice.task.Deadline;
 import alice.task.Event;
+import alice.task.Recurrence;
 import alice.task.Task;
 import alice.task.ToDo;
 
@@ -23,6 +24,9 @@ public class Parser {
     private static final String DEADLINE_BY_PREFIX = " /by ";
     private static final String EVENT_FROM_PREFIX = " /from ";
     private static final String EVENT_TO_PREFIX = " /to ";
+    private static final String RECURRENCE_PREFIX = " /r ";
+    private static final String RECURRENCE_ERROR =
+            "A recurrence interval must be daily, weekly, monthly, or yearly.";
     private static final String EVENT_DETAILS_ERROR =
             "An event needs a description, a /from date time, and a /to date time.";
 
@@ -75,14 +79,19 @@ public class Parser {
      */
     public int parseTaskNumber(String userInput, Command command, int taskCount) throws AliceException {
         String commandWord = command.getCommandWord();
-        String number = getCommandArguments(userInput, command);
+        String taskNumberText = getCommandArguments(userInput, command);
 
-        if (number.isEmpty()) {
+        if (taskNumberText.isEmpty()) {
             throw new AliceException("Please provide a task number to " + commandWord + ".");
         }
 
+        return parseTaskNumber(taskNumberText, taskCount);
+    }
+
+    /** Parses a task-number value and checks that it identifies an existing task. */
+    private int parseTaskNumber(String taskNumberText, int taskCount) throws AliceException {
         try {
-            int taskNumber = Integer.parseInt(number);
+            int taskNumber = Integer.parseInt(taskNumberText);
             if (taskNumber < 1 || taskNumber > taskCount) {
                 throw new AliceException("There is no task numbered " + taskNumber + ".");
             }
@@ -90,6 +99,36 @@ public class Parser {
         } catch (NumberFormatException exception) {
             throw new AliceException("The task number must be a positive whole number.");
         }
+    }
+
+    /**
+     * Parses a repeat command's task number and recurrence interval.
+     *
+     * @param userInput The complete repeat command.
+     * @param taskCount The number of tasks currently in the list.
+     * @return The requested task number and recurrence interval.
+     * @throws AliceException If the repeat command is incomplete or invalid.
+     */
+    public RepeatDetails parseRepeatCommand(String userInput, int taskCount) throws AliceException {
+        String[] sections = getCommandArguments(userInput, Command.REPEAT).split("\\s+");
+        if (sections.length != MAX_COMMAND_SECTIONS) {
+            throw new AliceException("A repeat command needs a task number and an interval.");
+        }
+
+        int taskNumber = parseTaskNumber(sections[0], taskCount);
+
+        if (sections[1].equalsIgnoreCase("none")) {
+            return new RepeatDetails(taskNumber, null);
+        }
+        Recurrence recurrence = Recurrence.fromIntervalName(sections[1]);
+        if (recurrence == null) {
+            throw new AliceException("Repeat interval must be daily, weekly, monthly, yearly, or none.");
+        }
+        return new RepeatDetails(taskNumber, recurrence);
+    }
+
+    /** Represents the details supplied by a valid repeat command. */
+    public record RepeatDetails(int taskNumber, Recurrence recurrence) {
     }
 
     /**
@@ -132,6 +171,9 @@ public class Parser {
      */
     private Task parseToDo(String userInput) throws AliceException {
         String description = getCommandArguments(userInput, Command.TODO);
+        if (description.contains(RECURRENCE_PREFIX)) {
+            throw new AliceException("Todos cannot recur.");
+        }
         if (description.isEmpty()) {
             throw new AliceException("The description of a todo cannot be empty.");
         }
@@ -153,9 +195,12 @@ public class Parser {
             throw new AliceException("A deadline needs a description and a /by date.");
         }
 
+        OptionalRecurrence optionalRecurrence = parseOptionalRecurrence(sections[1]);
         try {
-            LocalDate by = LocalDate.parse(sections[1], DEADLINE_INPUT_FORMAT);
-            return new Deadline(sections[0], by);
+            LocalDate by = LocalDate.parse(optionalRecurrence.scheduledDetails(), DEADLINE_INPUT_FORMAT);
+            Deadline deadline = new Deadline(sections[0], by);
+            setOptionalRecurrence(deadline, optionalRecurrence.recurrence());
+            return deadline;
         } catch (DateTimeParseException exception) {
             throw new AliceException("Please use the date format yyyy-MM-dd.");
         }
@@ -181,15 +226,46 @@ public class Parser {
             throw new AliceException(EVENT_DETAILS_ERROR);
         }
 
+        OptionalRecurrence optionalRecurrence = parseOptionalRecurrence(toSections[1]);
         try {
             LocalDateTime fromDateTime = LocalDateTime.parse(toSections[0], EVENT_INPUT_FORMAT);
-            LocalDateTime toDateTime = LocalDateTime.parse(toSections[1], EVENT_INPUT_FORMAT);
+            LocalDateTime toDateTime = LocalDateTime.parse(
+                    optionalRecurrence.scheduledDetails(), EVENT_INPUT_FORMAT);
             if (toDateTime.isBefore(fromDateTime)) {
                 throw new AliceException("An event cannot end before it starts.");
             }
-            return new Event(fromSections[0], fromDateTime, toDateTime);
+            Event event = new Event(fromSections[0], fromDateTime, toDateTime);
+            setOptionalRecurrence(event, optionalRecurrence.recurrence());
+            return event;
         } catch (DateTimeParseException exception) {
             throw new AliceException("Please use the event date time format yyyy-MM-dd HHmm.");
         }
+    }
+
+    /** Parses an optional recurrence option at the end of scheduled task details. */
+    private OptionalRecurrence parseOptionalRecurrence(String details) throws AliceException {
+        String[] sections = details.split(RECURRENCE_PREFIX, MAX_COMMAND_SECTIONS);
+        if (sections.length == 1) {
+            return new OptionalRecurrence(details, null);
+        }
+        if (sections[0].isBlank() || sections[1].isBlank()) {
+            throw new AliceException(RECURRENCE_ERROR);
+        }
+        Recurrence recurrence = Recurrence.fromIntervalName(sections[1]);
+        if (recurrence == null) {
+            throw new AliceException(RECURRENCE_ERROR);
+        }
+        return new OptionalRecurrence(sections[0], recurrence);
+    }
+
+    /** Applies an optional recurrence interval to a scheduled task. */
+    private void setOptionalRecurrence(Task task, Recurrence recurrence) {
+        if (recurrence != null) {
+            task.setRecurrence(recurrence);
+        }
+    }
+
+    /** Represents scheduled task details and an optional recurrence interval. */
+    private record OptionalRecurrence(String scheduledDetails, Recurrence recurrence) {
     }
 }

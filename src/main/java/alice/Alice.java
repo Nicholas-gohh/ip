@@ -1,6 +1,7 @@
 package alice;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import alice.parser.Parser;
 import alice.storage.Storage;
 import alice.task.Task;
 import alice.task.TaskList;
+import alice.task.ToDo;
 import alice.ui.Ui;
 
 /**
@@ -41,9 +43,10 @@ public class Alice {
         Command command = Command.fromCommandWord(parser.getCommandWord(userInput));
         try {
             return switch (command) {
-                case BYE -> "Bye. Hope to see you again soon!";
+                case BYE -> getByeResponse();
                 case LIST -> getTaskListResponse();
                 case MARK, UNMARK -> getTaskStatusResponse(userInput, command);
+                case REPEAT -> getRepeatResponse(userInput);
                 case TODO, DEADLINE, EVENT -> getAddTaskResponse(userInput);
                 case DATE -> getDateResponse(parser.parseDate(userInput));
                 case FIND -> getFindResponse(parser.parseKeyword(userInput));
@@ -53,6 +56,11 @@ public class Alice {
         } catch (AliceException e) {
             return e.getMessage();
         }
+    }
+
+    /** Creates the response for the {@code bye} command. */
+    private String getByeResponse() {
+        return "Bye. Hope to see you again soon!";
     }
 
     /** Creates the response for a {@code mark} or {@code unmark} command. */
@@ -66,8 +74,19 @@ public class Alice {
         }
 
         if (isMarking) {
+            if (task.isRecurring()) {
+                Task nextOccurrence = task.createNextOccurrence(LocalDateTime.now());
+                task.markAsDone();
+                tasks.add(nextOccurrence);
+                storage.save(tasks.asList());
+                return "Nice! I've marked this task as done:\n  " + task
+                        + "\nI've added the next occurrence:\n  " + nextOccurrence;
+            }
             task.markAsDone();
         } else {
+            if (task.isRecurring()) {
+                throw new AliceException("Completed recurring tasks cannot be unmarked.");
+            }
             task.unmarkAsDone();
         }
         storage.save(tasks.asList());
@@ -75,6 +94,36 @@ public class Alice {
         return isMarking
                 ? "Nice! I've marked this task as done:\n  " + task
                 : "OK, I've marked this task as not done yet:\n  " + task;
+    }
+
+    /** Creates the response for a {@code repeat} command. */
+    private String getRepeatResponse(String userInput) throws AliceException {
+        Parser.RepeatDetails repeatDetails = parser.parseRepeatCommand(userInput, tasks.size());
+        Task task = tasks.get(repeatDetails.taskNumber() - 1);
+        if (task instanceof ToDo) {
+            throw new AliceException("Todos cannot recur.");
+        }
+        if (task.isDone()) {
+            throw new AliceException("Completed tasks' recurring status cannot be changed.");
+        }
+        if (repeatDetails.recurrence() == null) {
+            if (!task.isRecurring()) {
+                throw new AliceException("This task is not recurring.");
+            }
+            task.clearRecurrence();
+            storage.save(tasks.asList());
+            return "Stopped recurrence for this task:\n  " + task;
+        }
+
+        if (repeatDetails.recurrence() == task.getRecurrence()) {
+            throw new AliceException("This task already repeats "
+                    + repeatDetails.recurrence().getDisplayName() + ".");
+        }
+        boolean wasRecurring = task.isRecurring();
+        task.setRecurrence(repeatDetails.recurrence());
+        storage.save(tasks.asList());
+        return (wasRecurring ? "Updated this task to repeat " : "Got it. This task will now repeat ")
+                + repeatDetails.recurrence().getDisplayName() + ":\n  " + task;
     }
 
     /** Creates the response for a task-creation command. */
