@@ -13,6 +13,7 @@ import java.util.List;
 import alice.exception.AliceException;
 import alice.task.Deadline;
 import alice.task.Event;
+import alice.task.Recurrence;
 import alice.task.Task;
 import alice.task.ToDo;
 
@@ -22,20 +23,34 @@ import alice.task.ToDo;
  * Saves Alice tasks to, and loads them from, data/Alice.txt.
  */
 public class Storage {
-    private static final Path FILE_PATH = Path.of("data", "Alice.txt");
     private static final String TODO_TYPE = "T";
     private static final String DEADLINE_TYPE = "D";
     private static final String EVENT_TYPE = "E";
     private static final String INCOMPLETE_STATUS = "0";
     private static final String COMPLETED_STATUS = "1";
+    private final Path filePath;
+
+    /** Creates storage that saves tasks to data/Alice.txt. */
+    public Storage() {
+        this(Path.of("data", "Alice.txt"));
+    }
+
+    /**
+     * Creates storage that saves tasks to the supplied file.
+     *
+     * @param filePath The file used to save tasks.
+     */
+    Storage(Path filePath) {
+        this.filePath = filePath;
+    }
 
     /**
      * Creates the data folder and Alice.txt if they do not already exist.
      */
     private void createFileIfMissing() throws IOException {
-        Files.createDirectories(FILE_PATH.getParent());
-        if (Files.notExists(FILE_PATH)) {
-            Files.createFile(FILE_PATH);
+        Files.createDirectories(filePath.getParent());
+        if (Files.notExists(filePath)) {
+            Files.createFile(filePath);
         }
     }
 
@@ -54,16 +69,21 @@ public class Storage {
             }
             case Deadline deadline -> {
                 return DEADLINE_TYPE + " | " + status + " | " + task.getDescription()
-                        + " | " + deadline.getBy();
+                        + " | " + deadline.getBy() + formatRecurrence(task);
             }
             case Event event -> {
                 return EVENT_TYPE + " | " + status + " | " + task.getDescription()
-                        + " | " + event.getFrom() + " | " + event.getTo();
+                        + " | " + event.getFrom() + " | " + event.getTo() + formatRecurrence(task);
             }
             default -> {
                 throw new AliceException("Unknown task type.");
             }
         }
+    }
+
+    /** Returns an optional saved recurrence field for a scheduled task. */
+    private String formatRecurrence(Task task) {
+        return task.isRecurring() ? " | " + task.getRecurrence().getDisplayName() : "";
     }
 
     /**
@@ -117,11 +137,13 @@ public class Storage {
 
     /** Creates a deadline task from its validated storage fields. */
     private Task createDeadline(String[] parts) throws AliceException {
-        if (parts.length != 4 || parts[3].isEmpty()) {
+        if ((parts.length != 4 && parts.length != 5) || parts[3].isEmpty()) {
             throw new AliceException("Invalid deadline task.");
         }
         try {
-            return new Deadline(parts[2], LocalDate.parse(parts[3]));
+            Deadline deadline = new Deadline(parts[2], LocalDate.parse(parts[3]));
+            restoreRecurrence(deadline, parts, 4);
+            return deadline;
         } catch (DateTimeParseException exception) {
             throw new AliceException("Invalid deadline date.");
         }
@@ -129,14 +151,27 @@ public class Storage {
 
     /** Creates an event task from its validated storage fields. */
     private Task createEvent(String[] parts) throws AliceException {
-        if (parts.length != 5 || parts[3].isEmpty() || parts[4].isEmpty()) {
+        if ((parts.length != 5 && parts.length != 6) || parts[3].isEmpty() || parts[4].isEmpty()) {
             throw new AliceException("Invalid event task.");
         }
         try {
-            return new Event(parts[2], LocalDateTime.parse(parts[3]),
+            Event event = new Event(parts[2], LocalDateTime.parse(parts[3]),
                     LocalDateTime.parse(parts[4]));
+            restoreRecurrence(event, parts, 5);
+            return event;
         } catch (DateTimeParseException exception) {
             throw new AliceException("Invalid event date time.");
+        }
+    }
+
+    /** Restores the optional recurrence field of a scheduled task. */
+    private void restoreRecurrence(Task task, String[] parts, int recurrenceIndex) throws AliceException {
+        if (parts.length == recurrenceIndex + 1) {
+            Recurrence recurrence = Recurrence.fromIntervalName(parts[recurrenceIndex]);
+            if (recurrence == null) {
+                throw new AliceException("Invalid recurrence interval.");
+            }
+            task.setRecurrence(recurrence);
         }
     }
 
@@ -157,7 +192,7 @@ public class Storage {
         ArrayList<Task> tasks = new ArrayList<>();
         try {
             createFileIfMissing();
-            List<String> lines = Files.readAllLines(FILE_PATH);
+            List<String> lines = Files.readAllLines(filePath);
             for (int lineNumber = 0; lineNumber < lines.size(); lineNumber++) {
                 try {
                     tasks.add(parseTask(lines.get(lineNumber)));
@@ -185,11 +220,11 @@ public class Storage {
 
         try {
             createFileIfMissing();
-            Files.write(FILE_PATH, lines,
+            Files.write(filePath, lines,
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE);
         } catch (IOException exception) {
-            throw new AliceException("Unable to save tasks to " + FILE_PATH + ".");
+            throw new AliceException("Unable to save tasks to " + filePath + ".");
         }
     }
 }
