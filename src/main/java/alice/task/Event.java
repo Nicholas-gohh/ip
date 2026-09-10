@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class Event extends Task {
     private static final DateTimeFormatter DISPLAY_FORMAT =
-            DateTimeFormatter.ofPattern("MMM dd yyyy h:mm a");
+            DateTimeFormatter.ofPattern("MMM dd yyyy h:mm");
     private final LocalDateTime fromDateTime;
     private final LocalDateTime toDateTime;
 
@@ -71,7 +71,13 @@ public class Event extends Task {
     @Override
     public String toString() {
         String recurrenceText = isRecurring() ? " (repeats: " + getRecurrence().getDisplayName() + ")" : "";
-        return "[E]" + super.toString() + " (from: " + fromDateTime.format(DISPLAY_FORMAT)
-                + " to: " + toDateTime.format(DISPLAY_FORMAT) + ")" + recurrenceText;
+        return "[E]" + super.toString() + " (from: " + formatDateTime(fromDateTime)
+                + " to: " + formatDateTime(toDateTime) + ")" + recurrenceText;
+    }
+
+    /** Formats a date and time with a lowercase meridiem indicator. */
+    private String formatDateTime(LocalDateTime dateTime) {
+        String meridiem = dateTime.getHour() < 12 ? "am" : "pm";
+        return dateTime.format(DISPLAY_FORMAT) + " " + meridiem;
     }
 }
