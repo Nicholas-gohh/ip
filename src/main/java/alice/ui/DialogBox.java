@@ -63,6 +63,16 @@ public class DialogBox extends HBox {
     }
 
     /**
+     * Creates a dialog that draws attention to an error in a user command.
+     *
+     * @param text The error explanation.
+     * @return The formatted error dialog.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        return new DialogBox(text, "!", "error-dialog");
+    }
+
+    /**
      * Reverses the text and avatar positions.
      */
     private void flip() {
