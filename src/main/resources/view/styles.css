@@ -73,6 +73,19 @@
     -fx-background-color: #223b44;
 }
 
+.error-dialog .message {
+    -fx-background-color: #6b2934;
+    -fx-border-color: #ff9e9e;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-font-weight: bold;
+}
+
+.error-dialog .avatar {
+    -fx-background-color: #d85762;
+    -fx-text-fill: #ffffff;
+}
+
 .welcome-dialog .message {
     -fx-font-family: "Consolas";
     -fx-font-size: 12px;

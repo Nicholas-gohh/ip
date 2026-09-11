@@ -40,9 +40,19 @@ public class Alice {
      * @return Alice's response to the command.
      */
     public String getResponse(String userInput) {
+        return getResponseResult(userInput).message();
+    }
+
+    /**
+     * Processes a command and identifies whether its response describes an error.
+     *
+     * @param userInput The command entered by the user.
+     * @return The response text together with its error status.
+     */
+    public Response getResponseResult(String userInput) {
         Command command = Command.fromCommandWord(parser.getCommandWord(userInput));
         try {
-            return switch (command) {
+            String message = switch (command) {
                 case BYE -> getByeResponse();
                 case LIST -> getTaskListResponse();
                 case MARK, UNMARK -> getTaskStatusResponse(userInput, command);
@@ -53,9 +63,19 @@ public class Alice {
                 case DELETE -> getDeleteResponse(userInput);
                 case UNKNOWN -> throw new AliceException("I don't understand that command.");
             };
+            return new Response(message, false);
         } catch (AliceException e) {
-            return e.getMessage();
+            return new Response(e.getMessage(), true);
         }
+    }
+
+    /**
+     * Represents text returned after processing a command.
+     *
+     * @param message The text to display to the user.
+     * @param isError Whether the command could not be completed.
+     */
+    public record Response(String message, boolean isError) {
     }
 
     /** Creates the response for the {@code bye} command. */

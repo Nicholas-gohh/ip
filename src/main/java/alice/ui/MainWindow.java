@@ -1,6 +1,7 @@
 package alice.ui;
 
 import alice.Alice;
+import alice.Alice.Response;
 import alice.parser.Command;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -54,7 +55,11 @@ public class MainWindow {
             return;
         }
         dialogContainer.getChildren().add(DialogBox.getUserDialog(command));
-        dialogContainer.getChildren().add(DialogBox.getBotDialog(alice.getResponse(command)));
+        Response response = alice.getResponseResult(command);
+        DialogBox responseDialog = response.isError()
+                ? DialogBox.getErrorDialog(response.message())
+                : DialogBox.getBotDialog(response.message());
+        dialogContainer.getChildren().add(responseDialog);
         userInput.clear();
         if (command.equals(Command.BYE.getCommandWord())) {
             Platform.exit();
