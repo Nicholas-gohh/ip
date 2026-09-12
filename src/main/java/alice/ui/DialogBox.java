@@ -59,7 +59,7 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getBotDialog(String text) {
 
-        return new DialogBox(text, "A", "bot-dialog");
+        return new DialogBox(text, "◇", "bot-dialog");
     }
 
     /**
