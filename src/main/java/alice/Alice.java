@@ -19,6 +19,10 @@ import alice.ui.Ui;
  */
 public class Alice {
     private static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
+    private static final String UNKNOWN_COMMAND_ERROR = "Oh dear — I didn’t quite understand that command.";
+    private static final String TODO_USAGE = "todo read book";
+    private static final String DEADLINE_USAGE = "deadline submit report /by 2026-10-01";
+    private static final String EVENT_USAGE = "event meeting /from 2026-10-01 1400 /to 2026-10-01 1500";
 
     private final Storage storage;
     private final TaskList tasks;
@@ -65,8 +69,41 @@ public class Alice {
             };
             return new Response(message, false);
         } catch (AliceException e) {
-            return new Response(e.getMessage(), true);
+            return new Response(formatErrorResponse(e.getMessage(), command), true);
         }
+    }
+
+    /**
+     * Adds a useful example to errors caused by incomplete task-creation commands.
+     *
+     * @param message The original explanation of the error.
+     * @param command The command that caused the error.
+     * @return A friendly error response, with usage guidance where useful.
+     */
+    private String formatErrorResponse(String message, Command command) {
+        return switch (command) {
+            case UNKNOWN -> UNKNOWN_COMMAND_ERROR;
+            case TODO -> message.equals("The description of a todo cannot be empty.")
+                    ? formatErrorWithUsage(message, TODO_USAGE)
+                    : message;
+            case DEADLINE -> formatErrorWithUsage(message, DEADLINE_USAGE);
+            case EVENT -> message.equals("An event cannot end before it starts.")
+                    ? message
+                    : formatErrorWithUsage(message, EVENT_USAGE);
+            default -> message;
+        };
+    }
+
+    /**
+     * Formats an input error with a command example.
+     *
+     * @param message The original explanation of the error.
+     * @param usage The example command that fixes the error.
+     * @return The formatted error response.
+     */
+    private String formatErrorWithUsage(String message, String usage) {
+        String sentenceFragment = Character.toLowerCase(message.charAt(0)) + message.substring(1);
+        return "Oh dear — " + sentenceFragment + "\nTry: " + usage;
     }
 
     /**
@@ -80,7 +117,7 @@ public class Alice {
 
     /** Creates the response for the {@code bye} command. */
     private String getByeResponse() {
-        return "Bye. Hope to see you again soon!";
+        return "See you soon. Don’t be late!";
     }
 
     /** Creates the response for a {@code mark} or {@code unmark} command. */
@@ -99,8 +136,8 @@ public class Alice {
                 task.markAsDone();
                 tasks.add(nextOccurrence);
                 storage.save(tasks.asList());
-                return "Nice! I've marked this task as done:\n  " + task
-                        + "\nI've added the next occurrence:\n  " + nextOccurrence;
+                return "Wonderful! That task is complete:\n  " + task
+                        + "\nThe next occurrence is ready:\n  " + nextOccurrence;
             }
             task.markAsDone();
         } else {
@@ -112,8 +149,8 @@ public class Alice {
         storage.save(tasks.asList());
 
         return isMarking
-                ? "Nice! I've marked this task as done:\n  " + task
-                : "OK, I've marked this task as not done yet:\n  " + task;
+                ? "Wonderful! That task is complete:\n  " + task
+                : "All right — this task is not done just yet:\n  " + task;
     }
 
     /** Creates the response for a {@code repeat} command. */
@@ -132,7 +169,7 @@ public class Alice {
             }
             task.clearRecurrence();
             storage.save(tasks.asList());
-            return "Stopped recurrence for this task:\n  " + task;
+            return "The clock has stopped for this task:\n  " + task;
         }
 
         if (repeatDetails.recurrence() == task.getRecurrence()) {
@@ -142,7 +179,7 @@ public class Alice {
         boolean wasRecurring = task.isRecurring();
         task.setRecurrence(repeatDetails.recurrence());
         storage.save(tasks.asList());
-        return (wasRecurring ? "Updated this task to repeat " : "Got it. This task will now repeat ")
+        return (wasRecurring ? "A small adjustment: this task will now repeat " : "Got it. This task will now repeat ")
                 + repeatDetails.recurrence().getDisplayName() + ":\n  " + task;
     }
 
@@ -181,6 +218,9 @@ public class Alice {
      * @return The formatted task list.
      */
     private String getTaskListResponse() {
+        if (tasks.size() == 0) {
+            return "Nothing on your list just yet. Shall we add something?";
+        }
         StringBuilder response = new StringBuilder("Here are the tasks in your list:");
         for (int index = 0; index < tasks.size(); index++) {
             response.append("\n  ").append(index + 1).append('.').append(tasks.get(index));
