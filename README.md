@@ -3,6 +3,13 @@
 Alice is a task manager for keeping track of todos, deadlines, events, and recurring scheduled tasks.
 Tasks are saved automatically in `data/Alice.txt` and restored when the application starts.
 
+## AI usage
+
+The project author used **OpenAI Codex (GPT-5)** as an AI coding assistant.
+Codex was used in the making of the GUI, personality of the chatbot, Javadoc comments and in some parts of the chatbot features.
+This includes the command class, recurrence class and the parser class.
+The author directed the requested changes, reviewed the generated work, and tested the application.
+
 ## Setting up in IntelliJ
 
 Prerequisite: JDK 25.
