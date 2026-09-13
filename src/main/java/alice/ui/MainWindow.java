@@ -36,7 +36,7 @@ public class MainWindow {
         DialogBox welcomeDialog = DialogBox.getBotDialog(Ui.getWelcomeMessage());
         welcomeDialog.getStyleClass().add("welcome-dialog");
         dialogContainer.getChildren().add(welcomeDialog);
-        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        scrollToBottom();
     }
 
     /**
@@ -64,6 +64,7 @@ public class MainWindow {
                 ? DialogBox.getErrorDialog(response.message())
                 : DialogBox.getBotDialog(response.message());
         dialogContainer.getChildren().add(responseDialog);
+        scrollToBottom();
         userInput.clear();
         if (command.equals(Command.BYE.getCommandWord())) {
             closeAfterFarewell();
@@ -78,5 +79,12 @@ public class MainWindow {
         PauseTransition farewellPause = new PauseTransition(FAREWELL_DELAY);
         farewellPause.setOnFinished(event -> Platform.exit());
         farewellPause.play();
+    }
+
+    /**
+     * Scrolls to the latest message after JavaFX has recalculated the chat layout.
+     */
+    private void scrollToBottom() {
+        Platform.runLater(() -> scrollPane.setVvalue(1.0));
     }
 }
